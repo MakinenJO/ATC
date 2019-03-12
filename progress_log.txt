@@ -1,0 +1,12 @@
+12.3.2019
+Käyttöliittymän perusluokat on luotu. Eri ikkunoille on tehty pohjaluokka
+ATCWindow, josta eri tarkoituksiin olevat FlightListView, AirFieldView ja
+GameInfoView -ikkunatyypit voidaan periä. Ikkunat alkavat käyttäytyä jo
+aika mukavasti, esimerkiksi taskbarissa näkyy vain yksi ikoni, ja kaikki
+ikkunat minimoituvat ja palautuvat samalla kertaa.
+
+Erityisiä virheitä ei ole vielä esiintynyt. Oikeiden komponenttien
+löytäminen ja niiden opettelu kuitenkin vie aika paljon aikaa.
+
+Tähän mennessä työmäärä on noin 15 tuntia. Aikataulusta ollaan hiukan
+jäljessä, mutta olen nyt aloittanut kunnolla projektin työstämisen.
