@@ -1,11 +1,12 @@
 package atcgame.ui
 
+import java.awt.Window.Type
+
 class GameInfoView
    (parent: GameUI,
     title: String,
     width: Int, height: Int,
     offsetX: Int, offsetY: Int) 
     
-extends ATCWindow(parent, title, width, height, offsetX, offsetY) {
-  
+extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.NORMAL) {
 }

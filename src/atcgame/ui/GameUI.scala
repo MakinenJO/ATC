@@ -1,5 +1,6 @@
 package atcgame.ui
 
+import atcgame.Game
 
 import scala.swing._
 import java.awt.Color
@@ -11,14 +12,14 @@ import javax.swing.WindowConstants
 import javax.swing.UIManager
 import javax.imageio.ImageIO
 import java.io.File
-import scala.swing.event.WindowDeiconified
-import scala.swing.event.WindowIconified
+import java.awt.event.ActionListener
+import javax.swing.Timer
 
 class GameUI extends SimpleSwingApplication {
   
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
-	
+	val game = new Game()
 	
   val arrivalsView = new FlightListView(this, "Arrivals", 400, 500, 10, 10)
   
@@ -26,30 +27,32 @@ class GameUI extends SimpleSwingApplication {
   
   val airfieldView = new AirFieldView(this, "Airport", 900, 900, 400, 50)
   
-  val gameInfoView = new GameInfoView(this, "Info", 400, 200, 1300, 200)
-  
-  
-  //val window5 = new AirFieldView(this, "Testi", 300, 300, 300, 300)
-  
-  def top = new MainFrame {
-    val windows = Vector(arrivalsView, departuresView, airfieldView, gameInfoView)
-		//visible = false
-		title = "Air Traffic Contol"
-		//iconify()
-		//dispose()
+  val gameInfoView = new GameInfoView(this, "Air Traffic Control", 450, 400, 1300, 200) {
+    
+    val windows = Vector(arrivalsView, departuresView, airfieldView)
 		
 		reactions += {
-      case w: WindowDeiconified => {
+      case w: event.WindowDeiconified => {
         windows.foreach(_.peer.setState(java.awt.Frame.NORMAL))
       }
-      case v: WindowIconified => {
+      case v: event.WindowIconified => {
         //TODO: pause game
         windows.foreach(_.peer.setState(java.awt.Frame.ICONIFIED))
       }
     }
-	}
+  }
+  
+  def top = gameInfoView
   
   
+  val listener = new ActionListener() {
+    def actionPerformed(e: java.awt.event.ActionEvent) = {
+      game.step()
+    }
+  }
+  
+  val timer = new Timer(4, listener)
+  timer.start()
   
   def end() = {
     val result = Dialog.showConfirmation(null, "Do you want to quit?", "Quit", Dialog.Options.YesNo)
