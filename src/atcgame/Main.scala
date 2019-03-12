@@ -1,5 +1,8 @@
 package atcgame
 
-object Main extends App {
-  println("Hello world")
+import atcgame.ui.GameUI
+
+
+object Main extends GameUI {
+  
 }
