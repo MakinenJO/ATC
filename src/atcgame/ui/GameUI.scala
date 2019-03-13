@@ -22,12 +22,11 @@ class GameUI extends SimpleSwingApplication {
 	val game = new Game()
 	
   val arrivalsView = new FlightListView(this, "Arrivals", 400, 500, 10, 10)
-  
   val departuresView = new FlightListView(this, "Departures", 400, 500, 10, 510)
   
-  val airfieldView = new AirFieldView(this, "Airport", 900, 900, 400, 50)
+  val airfieldView = new AirFieldView(this, "Airport", 950, 950, 400, 50)
   
-  val gameInfoView = new GameInfoView(this, "Air Traffic Control", 450, 400, 1300, 200) {
+  val gameInfoView = new GameInfoView(this, "Air Traffic Control", 450, 400, 1350, 200) {
     
     val windows = Vector(arrivalsView, departuresView, airfieldView)
 		
@@ -53,6 +52,15 @@ class GameUI extends SimpleSwingApplication {
   
   val timer = new Timer(4, listener)
   timer.start()
+  
+  listenTo(arrivalsView.button)
+
+  reactions += {
+    case event.ButtonClicked(b: Button) => {
+      game.planes.foreach(_.descend())
+      game.planes.foreach(p => println(p.orbit))
+    }
+  }
   
   def end() = {
     val result = Dialog.showConfirmation(null, "Do you want to quit?", "Quit", Dialog.Options.YesNo)

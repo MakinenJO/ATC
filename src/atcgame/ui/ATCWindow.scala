@@ -24,6 +24,8 @@ extends Frame {
   size = new Dimension(width, height)
   preferredSize = size
   
+  //resizable = false
+  
   this.peer.setLocation(offsetX, offsetY)
   
   override def closeOperation() = {
