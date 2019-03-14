@@ -10,7 +10,7 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
   var orbit = 4
   val centerX = 450
   val centerY = 450
-  var orbitRadius = 100.0 * orbit + 20
+  var orbitRadius = 100.0 * orbit //+ 20
   var velocity = 100
   def vAngular = velocity / orbitRadius
   var state: PlaneState = Orbiting
@@ -19,7 +19,7 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
     state.move(timeDelta)
   }
   
-  def facingAngle = radian + Math.PI * 3 / 4
+  def facingAngle = state.facingAngle
   
   def descend() = {
     orbit -= 1
@@ -28,6 +28,7 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
   
   sealed trait PlaneState {
     def move(timeDelta: Long): Unit
+    def facingAngle: Double
   }
   
   case object Orbiting extends PlaneState {
@@ -36,6 +37,8 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
       x = (centerX + orbitRadius * Math.cos(radian)).toInt
       y = (centerY + orbitRadius * Math.sin(radian)).toInt
     }
+    
+    def facingAngle = radian + Math.PI * 3 / 4
   }
   
   case object Descending extends PlaneState {
@@ -44,8 +47,10 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
       orbitRadius -= 0.1
       x = (centerX + orbitRadius * Math.cos(radian)).toInt
       y = (centerY + orbitRadius * Math.sin(radian)).toInt
-      if(orbitRadius <= 100.0 * orbit + 20)
+      if(orbitRadius <= 100.0 * orbit)
         state = Orbiting
     }
+    
+    def facingAngle = radian + 0.1 + Math.PI * 3 / 4
   }
 }

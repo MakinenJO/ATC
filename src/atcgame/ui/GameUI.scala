@@ -38,6 +38,9 @@ class GameUI extends SimpleSwingApplication {
         //TODO: pause game
         windows.foreach(_.peer.setState(java.awt.Frame.ICONIFIED))
       }
+      case x: event.WindowActivated => {
+        windows.foreach(_.peer.toFront())
+      }
     }
   }
   

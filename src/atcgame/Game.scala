@@ -3,6 +3,7 @@ package atcgame
 import scala.swing._
 
 import scala.collection.mutable.Buffer
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class Game {
@@ -14,11 +15,13 @@ class Game {
   planes += new Plane(50, 50, 1.0)
   
   def step() = {
-    val currentTime = System.currentTimeMillis()
-    val timeDelta = currentTime - time
-    planes.foreach(_.move(timeDelta))
+    scala.concurrent.Future {
+    	val currentTime = System.currentTimeMillis()
+			val timeDelta = currentTime - time
+			planes.foreach(_.move(timeDelta))      
+			time = currentTime
+    }
     
-    time = currentTime
   }
   
 }

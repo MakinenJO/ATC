@@ -34,17 +34,18 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
   		g.drawOval(50, 50, 800, 800)
   		g.drawLine(0, 450, 900, 450)
   		g.drawLine(450, 0, 450, 900)
+  		g.drawString("*", 450, 450)
 
   		game.planes.foreach(plane => {
     	  val at = new AffineTransform()
-    	  at.rotate(plane.facingAngle, 0, 0)
-			  //at.rotate(plane.facingAngle, -planeImage.getWidth/2, -planeImage.getHeight/2)
-			  //at.translate(dX, dY)
+			  at.translate(-dX, -dY) //translate to center of image
+			  //rotate around image center
+			  at.rotate(plane.facingAngle, planeImage.getWidth/2, planeImage.getHeight/2)
 	  	  val op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR)
 			  //val image = op.filter(planeImage, null)    			  
         g.drawImage(planeImage, op, plane.x, plane.y)
-        g.drawString("*", plane.x, plane.y)
-        g.drawString("*", 450, 450)
+        g.drawString("Plane", plane.x - 10, plane.y - 30)
+        g.drawOval(plane.x, plane.y, 3, 3)
       })
       //g.drawImage(planeImage, op, 300, 300)
     }
