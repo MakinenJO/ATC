@@ -16,6 +16,7 @@ abstract class ATCWindow
 extends Frame {
   this.peer.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE)
   this.peer.setType(windowType)
+  if(windowType == Type.UTILITY) this.peer.setFocusableWindowState(false)
   
   visible = true
   
