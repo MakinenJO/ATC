@@ -4,16 +4,17 @@ import javafx.geometry.Point2D
 import scala.swing.Label
 import javax.swing.ImageIcon
 import java.awt.Point
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
   
   var orbit = 4
   val centerX = 450
   val centerY = 450
-  var orbitRadius = 100.0 * orbit //+ 20
-  var velocity = 100
+  var orbitRadius = 100.0 * (orbit+1) //+ 20
+  var velocity = 150.0
   def vAngular = velocity / orbitRadius
-  var state: PlaneState = Orbiting
+  var state: PlaneState = Approaching
   
   def move(timeDelta: Long) = {
     state.move(timeDelta)
@@ -22,8 +23,12 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
   def facingAngle = state.facingAngle
   
   def descend() = {
-    orbit -= 1
-    state = Descending
+    scala.concurrent.Future {
+      Thread.sleep(1000)
+      orbit -= 1
+      state = Descending
+    }
+    
   }
   
   sealed trait PlaneState {
@@ -52,5 +57,21 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
     }
     
     def facingAngle = radian + 0.1 + Math.PI * 3 / 4
+  }
+  
+  case object Approaching extends PlaneState {
+    override def move(timeDelta: Long) = {
+      radian += vAngular * timeDelta / 1000
+      orbitRadius -= 0.3
+      velocity -= 0.1
+      x = (centerX + orbitRadius * Math.cos(radian)).toInt
+      y = (centerY + orbitRadius * Math.sin(radian)).toInt
+      if(orbitRadius <= 100.0 * orbit) {
+        state = Orbiting
+        velocity = 100.0
+      }
+    }
+    
+    def facingAngle = radian + 0.3 + Math.PI * 3 / 4
   }
 }
