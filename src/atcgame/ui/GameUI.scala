@@ -19,7 +19,7 @@ class GameUI extends SimpleSwingApplication {
   
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
-	val game = new Game()
+	var game = new Game()
 	
   val arrivalsView = new FlightListView(this, "Arrivals", 400, 500, 10, 10)
   val departuresView = new FlightListView(this, "Departures", 400, 500, 10, 510)
@@ -57,17 +57,28 @@ class GameUI extends SimpleSwingApplication {
   timer.start()
   
   listenTo(arrivalsView.button)
+  listenTo(gameInfoView.button)
 
   reactions += {
     case event.ButtonClicked(b: Button) => {
-      game.planes.foreach(_.descend())
-      game.planes.foreach(p => println(p.orbit))
+      b match {
+        case arrivalsView.button => game.planes.foreach(_.descend())
+        case gameInfoView.button => restart()
+      }
     }
   }
   
   def end() = {
     val result = Dialog.showConfirmation(null, "Do you want to quit?", "Quit", Dialog.Options.YesNo)
     if(result == Dialog.Result.Ok) sys.exit()
+  }
+  
+  def restart() = {
+    timer.stop()
+    airfieldView.timer.stop()
+    game = new Game()
+    timer.start()
+    airfieldView.timer.start()
   }
 
 }

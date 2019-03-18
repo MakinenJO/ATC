@@ -11,8 +11,8 @@ class Game {
   
   private var time = System.currentTimeMillis()
   
-  planes += new Plane(10, 10, 0.0)
-  planes += new Plane(50, 50, 1.0)
+  planes += new Plane(-100, -100, 0.0)
+  planes += new Plane(-100, -100, 1.0)
   
   def step() = {
     scala.concurrent.Future {
@@ -23,5 +23,6 @@ class Game {
     }
     
   }
+  
   
 }
