@@ -3,6 +3,7 @@ package atcgame
 import scala.swing._
 
 import scala.collection.mutable.Buffer
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -24,5 +25,9 @@ class Game {
     
   }
   
+  
+  def drawAirfield(g: Graphics2D) {
+    planes.foreach(_.draw(g))
+  }
   
 }

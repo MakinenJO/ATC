@@ -1,9 +1,11 @@
 package atcgame
 
-import javafx.geometry.Point2D
-import scala.swing.Label
-import javax.swing.ImageIcon
-import java.awt.Point
+import scala.swing._
+import java.io.File
+import javax.imageio.ImageIO
+import java.awt.geom.AffineTransform
+import java.awt.image.AffineTransformOp
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
@@ -23,6 +25,7 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
   def facingAngle = state.facingAngle
   
   def descend() = {
+    //maybe just call this after text has been displayed
     scala.concurrent.Future {
       Thread.sleep(1000)
       orbit -= 1
@@ -74,4 +77,25 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
     
     def facingAngle = radian + 0.3 + Math.PI * 3 / 4
   }
+  
+  
+  def draw(g: Graphics2D) {
+    //translate to center of image and rotate around center
+	  val at = new AffineTransform()
+	  at.translate(-Plane.dX, -Plane.dY)
+	  at.rotate(facingAngle, Plane.planeImage.getWidth/2, Plane.planeImage.getHeight/2)
+	  val op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR)
+	  //val image = op.filter(planeImage, null)    			  
+    g.drawImage(Plane.planeImage, op, x, y)
+    g.drawString("Plane", x - 10, y - 30)
+  }
+  
+  
+}
+
+
+object Plane {
+  val planeImage = ImageIO.read(new File("img/plane2.png"))
+  val dX = planeImage.getWidth / 2
+  val dY = planeImage.getHeight / 2
 }

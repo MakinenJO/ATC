@@ -2,10 +2,6 @@ package atcgame.ui
 
 import scala.swing._
 import java.awt.Color
-import java.io.File
-import javax.imageio.ImageIO
-import java.awt.geom.AffineTransform
-import java.awt.image.AffineTransformOp
 import java.awt.RenderingHints
 import java.awt.Window.Type
 import java.awt.event.ActionListener
@@ -23,12 +19,10 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
   
   
   val fieldView = new Component {
-    val planeImage = ImageIO.read(new File("img/plane2.png"))
-    val dX = planeImage.getWidth / 2
-    val dY = planeImage.getHeight / 2
     
     override def paintComponent(g: Graphics2D) = {
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+      //g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED)
   		g.setColor(Color.RED)
       g.drawOval(250, 250, 400, 400)
   		g.drawOval(0, 0, 900, 900)
@@ -37,16 +31,8 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
   		g.drawLine(450, 0, 450, 900)
   		g.setColor(Color.BLACK)
 
-  		game.planes.foreach(plane => {
-  		  //translate to center of image and rotate around center
-    	  val at = new AffineTransform()
-			  at.translate(-dX, -dY)
-			  at.rotate(plane.facingAngle, planeImage.getWidth/2, planeImage.getHeight/2)
-	  	  val op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR)
-			  //val image = op.filter(planeImage, null)    			  
-        g.drawImage(planeImage, op, plane.x, plane.y)
-        g.drawString("Plane", plane.x - 10, plane.y - 30)
-      })
+  		game.drawAirfield(g)
+  		
       //g.drawImage(planeImage, op, 300, 300)
     }
   }
@@ -61,7 +47,7 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
     }
   }
   
-  val timer = new Timer(10, listener)
+  val timer = new Timer(8, listener)
   timer.start()
   
   

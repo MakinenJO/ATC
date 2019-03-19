@@ -16,7 +16,7 @@ class FlightListView
     offsetX: Int, offsetY: Int) 
     
 extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) {
-  val layout = new BoxPanel(Orientation.Vertical)
+  val layout = new BoxPanel(Orientation.Horizontal)
   val button = new Button("Descend")
   layout.contents += button
   
@@ -26,16 +26,19 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
     this.peer.setPreferredSize(new Dimension(300, 30))
     this.peer.setMinimumSize(new Dimension(300, 30))
     this.peer.setMaximumSize(new Dimension(300, 30))
+    var message = "Good day and welcome to Air Traffic Control simulator!!!"
     var textPos = 300
     override def paintComponent(g: Graphics2D) = {
       g.setColor(Color.BLACK)
       g.fillRect(0,0,300, 50)
       g.setColor(Color.YELLOW)
-      g.drawString("Well hello there!", textPos, 20)
+      g.drawString(message, textPos, 20)
       
-      if(textPos < -300) {timer.stop(); println("Timer stopped")}
+      if(textPos < -g.getFontMetrics.stringWidth(message)) {timer.stop(); println("Timer stopped")}
     }
     
+    //maybe move updating together with gameUI drawing
+    //might be smarter to keep it here, think about stopping
     val listener = new ActionListener() {
       def actionPerformed(e: java.awt.event.ActionEvent) = {
         textPos -= 1
