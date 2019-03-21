@@ -23,7 +23,7 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
     override def paintComponent(g: Graphics2D) = {
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
       //g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED)
-  		g.setColor(Color.RED)
+  		//g.setColor(Color.RED)
       g.drawOval(250, 250, 400, 400)
   		g.drawOval(0, 0, 900, 900)
   		g.drawOval(50, 50, 800, 800)
@@ -38,7 +38,7 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
   }
 
   contents = fieldView
-  this.peer.getContentPane().setBackground(Color.green)
+  this.peer.getContentPane().setBackground(new Color(0,100,0))
   this.pack()
   
   val listener = new ActionListener() {

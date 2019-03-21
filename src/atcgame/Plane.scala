@@ -7,8 +7,9 @@ import java.awt.geom.AffineTransform
 import java.awt.image.AffineTransformOp
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import java.awt.Color
 
-class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
+class Plane(val name: String, var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
   
   var orbit = 4
   val centerX = 450
@@ -17,6 +18,7 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
   var velocity = 150.0
   def vAngular = velocity / orbitRadius
   var state: PlaneState = Approaching
+  var selected = false //is plane hovered over in flightlistview
   
   def move(timeDelta: Long) = {
     state.move(timeDelta)
@@ -78,24 +80,27 @@ class Plane(var x: Int = 0, var y: Int = 0, var radian: Double = 0.0) {
     def facingAngle = radian + 0.3 + Math.PI * 3 / 4
   }
   
-  
+  //TODO: maybe move logic into companion object
   def draw(g: Graphics2D) {
     //translate to center of image and rotate around center
 	  val at = new AffineTransform()
 	  at.translate(-Plane.dX, -Plane.dY)
 	  at.rotate(facingAngle, Plane.planeImage.getWidth/2, Plane.planeImage.getHeight/2)
-	  val op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR)
-	  //val image = op.filter(planeImage, null)    			  
+	  val op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR) 			  
     g.drawImage(Plane.planeImage, op, x, y)
-    g.drawString("Plane", x - 10, y - 30)
+    
+    if(selected) g.setColor(Color.YELLOW) //selected plane will be highlighted with yellow
+    else g.setColor(Color.BLACK)
+    g.drawString(velocity.toInt.toString() + " kn", x - 10, y - 45)
+    g.drawString(name, x - 10, y - 30)
   }
   
   
 }
 
-
+//contains logic for drawing planes
 object Plane {
-  val planeImage = ImageIO.read(new File("img/plane2.png"))
-  val dX = planeImage.getWidth / 2
-  val dY = planeImage.getHeight / 2
+  private val planeImage = ImageIO.read(new File("img/plane2.png"))
+  private val dX = planeImage.getWidth / 2
+  private val dY = planeImage.getHeight / 2
 }

@@ -1,6 +1,6 @@
 package atcgame.ui
 
-import atcgame.Game
+import atcgame._
 
 import scala.swing._
 import java.awt.Color
@@ -19,7 +19,7 @@ class GameUI extends SimpleSwingApplication {
   
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
-	var game = new Game()
+	var game = new Game(this)
 	
   val arrivalsView = new FlightListView(this, "Arrivals", 400, 500, 10, 10)
   val departuresView = new FlightListView(this, "Departures", 400, 500, 10, 510)
@@ -44,8 +44,9 @@ class GameUI extends SimpleSwingApplication {
     }
   }
   
-  def top = gameInfoView
+  game.start()
   
+  def top = gameInfoView
   
   val listener = new ActionListener() {
     def actionPerformed(e: java.awt.event.ActionEvent) = {
@@ -56,16 +57,20 @@ class GameUI extends SimpleSwingApplication {
   val timer = new Timer(4, listener)
   timer.start()
   
-  listenTo(arrivalsView.button)
+  //listenTo(arrivalsView.button)
   listenTo(gameInfoView.button)
 
   reactions += {
     case event.ButtonClicked(b: Button) => {
       b match {
-        case arrivalsView.button => game.planes.foreach(_.descend())
+        //case arrivalsView.button => game.planes.foreach(_.descend())
         case gameInfoView.button => restart()
       }
     }
+  }
+  
+  def addArrivingPlane(p: Plane) = {
+    arrivalsView.addPlane(p)
   }
   
   def end() = {
@@ -76,7 +81,7 @@ class GameUI extends SimpleSwingApplication {
   def restart() = {
     timer.stop()
     airfieldView.timer.stop()
-    game = new Game()
+    game = new Game(this)
     timer.start()
     airfieldView.timer.start()
   }
