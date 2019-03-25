@@ -1,3 +1,23 @@
+25.3.2019
+Lentokoneiden käyttäytymistä on kehitetty. FlightlistView-luokka on saatu
+toimimaan halutusti. Uutena luokkana FlightListItem, jota flightlistview
+käyttää. Nyt lentokoneille voi antaa myös yksittäisiä käskyjä. Testaaminen on
+muodostunut pelin ajamisesta ja kokeilemisesta. Seuraavaksi vuorossa olisi
+lentokoneiden käyttäytymisen kehittäminen edelleen, jotta ne saadaan
+laskeutumaan ja nousemaan. Kiitoratoja on syytä alkaa myös toteuttaamaan.
+
+Erityisempiä virheitä en ole havainnut. Päänvaivaa on tuottanut pelilogiikan
+eristäminen UI-logiikasta, sillä haluaisin, että Game-luokka ei joudu kutsumaan
+UI-luokkien funktioita. Tavoitteena on, että UI pystyisi seuraamaan Gamessa
+tapahtuvia 'eventtejä', joihin se reagoisi. En kuitenkaan vielä tiedä, miten
+tämän toteuttaisin. Toinen ongelma on ollut miettiä, mitä toimintoja pelissä
+kannattaisi säikeistää.
+
+Kehittämiseen on parin viikon aikana mennyt arviolta 25 tuntia. Kokonais-
+työaika on siis noin 40 tuntia. Mielestäni olen nyt hyvin aikataulussa.
+
+
+
 12.3.2019
 Käyttöliittymän perusluokat on luotu. Eri ikkunoille on tehty pohjaluokka
 ATCWindow, josta eri tarkoituksiin olevat FlightListView, AirFieldView ja
