@@ -27,7 +27,7 @@ class Plane(val name: String, var x: Int = 0, var y: Int = 0, var radian: Double
   def facingAngle = state.facingAngle
   
   def descend() = {
-    //maybe just call this after text has been displayed
+    //maybe just call this after text has been displayed ie. no need for future
     scala.concurrent.Future {
       Thread.sleep(1000)
       orbit -= 1
@@ -35,6 +35,15 @@ class Plane(val name: String, var x: Int = 0, var y: Int = 0, var radian: Double
     }
     
   }
+  
+  def land() = {
+    state = Landing
+  }
+  
+  def crashesWith(p: Plane) = {
+    math.abs(p.x - x) < 32 && math.abs(p.y - y) < 32
+  }
+  
   
   sealed trait PlaneState {
     def move(timeDelta: Long): Unit
@@ -78,6 +87,29 @@ class Plane(val name: String, var x: Int = 0, var y: Int = 0, var radian: Double
     }
     
     def facingAngle = radian + 0.3 + Math.PI * 3 / 4
+  }
+  
+  case object Landing extends PlaneState {
+    override def move(timeDelta: Long) = {
+      x += 1
+      y += 1
+    }
+    
+    def facingAngle = Math.PI * 3 / 4
+  }
+  
+  case object Taxiing extends PlaneState {
+    override def move(timeDelta: Long) = {
+      
+    }
+    def facingAngle = Math.PI * 3 / 4
+  }
+  
+  case object Takeoff extends PlaneState {
+    override def move(timeDelta: Long) = {
+      
+    }
+    def facingAngle = Math.PI * 3 / 4
   }
   
   //TODO: maybe move logic into companion object

@@ -21,8 +21,8 @@ class Game(val ui: GameUI) extends {
   }
   
   def start() = {
-	  addPlane(new Plane("Plane0", -100, -100, 0.0))
-	  addPlane(new Plane("Plane1", -100, -100, 1.0))    
+	  //addPlane(new Plane("Plane0", -100, -100, 0.0))
+	  //addPlane(new Plane("Plane1", -100, -100, 1.0))    
   }
   
   def step() = {
@@ -37,9 +37,21 @@ class Game(val ui: GameUI) extends {
 	  timeTillAdd -= timeDelta.toInt
 		if(timeTillAdd <= 0) {
 		  addPlane(new Plane("Plane" + planes.size, -100, -100, 0.0))
-		  timeTillAdd = addInterval
+		  timeTillAdd = addInterval * (scala.util.Random.nextInt(4) + 1)
 		}
+	  
+	  checkCollisions()
+	  
 		time = currentTime
+  }
+  
+  def checkCollisions(): Boolean = {
+    planes.foreach(plane1 => {
+      planes.dropWhile(_ != plane1).drop(1).foreach(plane2 => {
+        if(plane1.crashesWith(plane2)) return true
+      })
+    })
+    return false
   }
   
   

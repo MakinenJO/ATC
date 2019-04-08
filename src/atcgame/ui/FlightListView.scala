@@ -9,6 +9,8 @@ import javax.swing.BoxLayout
 import java.awt.Color
 import java.awt.event.ActionListener
 import javax.swing.Timer
+import javax.swing.Box
+import javafx.scene.layout.Region
 
 
 class FlightListView
@@ -23,51 +25,19 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
   val layout = new BoxPanel(Orientation.Vertical)
   
   mainLayout.contents = layout
-//  val button = new Button("Descend")
-//  layout.contents += button
-//  
-//  
-//  
-//  val textView = new Label() {
-//    this.peer.setPreferredSize(new Dimension(300, 30))
-//    this.peer.setMinimumSize(new Dimension(300, 30))
-//    this.peer.setMaximumSize(new Dimension(300, 30))
-//    var message = "Good day and welcome to Air Traffic Control simulator!!!"
-//    var textPos = 300
-//    override def paintComponent(g: Graphics2D) = {
-//      g.setColor(Color.BLACK)
-//      g.fillRect(0,0,300, 50)
-//      g.setColor(Color.YELLOW)
-//      g.drawString(message, textPos, 20)
-//      
-//      if(textPos < -g.getFontMetrics.stringWidth(message)) {timer.stop(); println("Timer stopped")}
-//    }
-//    
-//    //maybe move updating together with gameUI drawing
-//    //might be smarter to keep it here, think about stopping
-//    val listener = new ActionListener() {
-//      def actionPerformed(e: java.awt.event.ActionEvent) = {
-//        textPos -= 1
-//        repaint()
-//      }
-//    }
-//  
-//    val timer = new Timer(10, listener)
-//    timer.start()
-//    
-//    }
-//  
-//  
-//  layout.contents += textView
   
   
   contents = mainLayout
 
   def addPlane(p: Plane) = {
     layout.contents += new FlightListItem(p)
-    println("flightlistitem added")
-    println(layout.contents.size)
     //pack()
+    //TODO: use these for animating removal of flightlistitem
+    //layout.peer.add(Box.createVerticalStrut(40))
+    //val sep = new Separator(Orientation.Horizontal)
+    //sep.peer.setSize(40,40)
+    //sep.peer.setMaximumSize(new Dimension(40,40))
+    //layout.contents += sep
     peer.revalidate()
   }
 }
