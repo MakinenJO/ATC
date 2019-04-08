@@ -1,3 +1,27 @@
+8.4.2019
+Viimeisten parin viikon aikana kehitystyö on jäänyt vähäisemmäksi muiden
+kiireiden vuoksi. Tärkein saavutus on lentokoneiden törmäystunnistuksen
+toteuttaminen. Törmäyksen tunnistamista on testattu ajamalla peliä ja
+tulostamalla konsoliin. Näyttää toimivan hyvin. Myöhemmin pyrin kirjoittamaan
+yksikkötestit törmäystunnistukselle.
+
+Olen miettinyt ja tutkinut erilaisia ratkaisutapoja Game-luokan tapahtumien
+käsittelyyn, ja aion pian kokeilla paria vaihtoehtoa ja valita luontevimmalta
+tuntuvan.
+
+Suurimpana seuraavana haasteena uskon olevan koneiden käyttäytymisen
+toteuttaminen maan pinnalla, etenkin se, miten saan koneet liikkumaan
+määrätylle portille. Kun koneiden kaikki toiminnallisuus on saatu toteutettua,
+voin siirtyä ohjelman muokkaamiseen enemmän pelimäiseksi.
+
+Viimeisten parin viikon aikana olen työskennellyt projektin parissa noin 15
+tuntia. Yhteensä tunteja on kertynyt siis arviolta 55 tuntia. Vähäisen
+kehityksen vuoksi olen nyt varmaan hieman myöhässä aikataulusta, muuta yritän
+parhaani mukaan kiriä tahtia parin seuraavan viikon aikana, jotta saan pelin
+esittelykelpoiseksi määräaikaan mennessä.
+
+
+
 25.3.2019
 Lentokoneiden käyttäytymistä on kehitetty. FlightlistView-luokka on saatu
 toimimaan halutusti. Uutena luokkana FlightListItem, jota flightlistview
