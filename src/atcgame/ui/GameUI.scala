@@ -40,6 +40,7 @@ class GameUI extends SimpleSwingApplication {
       }
       case x: event.WindowActivated => {
         windows.foreach(_.peer.toFront())
+        println("activated!")
       }
     }
   }

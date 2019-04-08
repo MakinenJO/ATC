@@ -7,23 +7,41 @@ import java.awt.Color
 import java.awt.event.ActionListener
 import javax.swing.Timer
 import javax.swing.BoxLayout
-import javax.swing.border.EmptyBorder
+import javax.swing.border.LineBorder
+import javafx.scene.layout.HBox
+import javafx.scene.layout.VBox
 
 class FlightListItem(val plane: Plane) extends BoxPanel(Orientation.Horizontal) {
-  //this.peer.setPreferredSize(new Dimension(400, 60))
-  //this.peer.setMinimumSize(new Dimension(400, 60))
-  //this.peer.setMaximumSize(new Dimension(400, 60))
+  this.peer.setPreferredSize(new Dimension(300, 60))
+  this.peer.setMinimumSize(new Dimension(300, 60))
+  this.peer.setMaximumSize(new Dimension(300, 60))
   //peer.setBounds(0, 0, 400, 60)
+  border = new LineBorder(Color.DARK_GRAY)
   
-  border = new EmptyBorder(0 ,0,0 ,0)
-  val button = new Button("Descend") {
+  val planeInfo = new Label(plane.name)
+  
+  val descendButton = new Button("Dsc") {
     reactions += {
       case event.ButtonClicked(b: Button) => {
         plane.descend()
       }
     }
   }
-  contents += button
+  
+  val landButton = new Button("Lnd") {
+    reactions += {
+      case event.ButtonClicked(b: Button) => {
+        plane.land()
+      }
+    }
+  }
+  
+  
+  val topRow = new FlowPanel() {
+    contents += planeInfo
+    contents += descendButton
+    contents += landButton
+  }
   
   
   val textView = new Label() {
@@ -38,7 +56,7 @@ class FlightListItem(val plane: Plane) extends BoxPanel(Orientation.Horizontal) 
       g.setColor(Color.YELLOW)
       g.drawString(message, textPos, 20)
       
-      if(textPos < -g.getFontMetrics.stringWidth(message)) {timer.stop(); println("Timer stopped")}
+      if(textPos < -g.getFontMetrics.stringWidth(message)) {timer.stop()}
     }
     
     //maybe move updating together with gameUI drawing
@@ -56,25 +74,26 @@ class FlightListItem(val plane: Plane) extends BoxPanel(Orientation.Horizontal) 
     }
   
   
-  contents += textView
   
-  listenTo(button)
-  listenTo(button.mouse.moves)
+  val mainLayout = new BoxPanel(Orientation.Vertical) {
+    contents += topRow
+    contents += textView
+  }
+  
+  contents += mainLayout
+  //listenTo(button)
+  listenTo(descendButton.mouse.moves)
+  listenTo(landButton.mouse.moves)
   listenTo(mouse.moves)
   
   reactions += {
-    case event.ButtonClicked(b: Button) => {
-      //plane.descend()
-    }
     
     case event.MouseEntered(_,_,_) => {
-      println("entered " + plane.name)
       plane.selected = true
     }
     
     case event.MouseExited(_,_,_) => {
       plane.selected = false
-      println("exited " + plane.name)
     }
   }
   
