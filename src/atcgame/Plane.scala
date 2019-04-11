@@ -117,7 +117,7 @@ class Plane(val name: String, var x: Int = 0, var y: Int = 0, var radian: Double
     //translate to center of image and rotate around center
 	  val at = new AffineTransform()
 	  at.translate(-Plane.dX, -Plane.dY)
-	  at.rotate(facingAngle, Plane.planeImage.getWidth/2, Plane.planeImage.getHeight/2)
+	  at.rotate(facingAngle, Plane.dX, Plane.dY)
 	  val op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR) 			  
     g.drawImage(Plane.planeImage, op, x, y)
     

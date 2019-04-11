@@ -10,6 +10,7 @@ import atcgame.ui.GameUI
 
 class Game(val ui: GameUI) extends {
   val planes = Buffer[Plane]()
+  val runways = Buffer[Runway]()
   val addInterval = 10000
   var timeTillAdd = addInterval
   
@@ -21,8 +22,11 @@ class Game(val ui: GameUI) extends {
   }
   
   def start() = {
-	  //addPlane(new Plane("Plane0", -100, -100, 0.0))
-	  //addPlane(new Plane("Plane1", -100, -100, 1.0))    
+	  runways += new Runway((250, 450), (650, 450))
+	  runways += new Runway((250, 650), (650, 650))
+	  runways += new Runway((450, 200), (450, 600))
+	  runways += new Runway((100, 100), (500, 500))
+	  runways += new Runway((100, 600), (600, 100))
   }
   
   def step() = {
@@ -56,6 +60,7 @@ class Game(val ui: GameUI) extends {
   
   
   def drawAirfield(g: Graphics2D) {
+    runways.foreach(_.draw(g))
     planes.foreach(_.draw(g))
   }
   
