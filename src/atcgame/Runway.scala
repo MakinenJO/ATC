@@ -5,6 +5,7 @@ import javax.imageio.ImageIO
 import java.io.File
 import java.awt.geom.AffineTransform
 import java.awt.image.AffineTransformOp
+import java.awt.Color
 
 class Runway(val exit1: Exit, val exit2: Exit) {
   
@@ -36,10 +37,14 @@ class Runway(val exit1: Exit, val exit2: Exit) {
     	x += (32 * Math.sin(rotation)).toInt
     	y -= (32 * Math.cos(rotation)).toInt
     }
+    g.setColor(Color.YELLOW)
+    g.drawString(exit1.name, exit1.x - 10, exit1.y - 45)
+    g.drawString(exit2.name, exit2.x - 10, exit2.y - 45)
+    g.setColor(Color.BLACK)
   }
 }
 
-case class Exit(x: Int, y: Int, name: String)
+case class Exit(x: Int, y: Int, name: String, var selected: Boolean = false)
 
 object Runway {
   private val runwayImage = ImageIO.read(new File("img/runway.png"))

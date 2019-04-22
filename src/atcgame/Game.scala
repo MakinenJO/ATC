@@ -23,7 +23,7 @@ class Game(val ui: GameUI) extends {
   
   def start() = {
 	  //runways += new Runway((250, 450), (650, 450))
-	  runways += new Runway(new Exit(250, 650, "E1"), new Exit(650, 650, "E2"))
+	  runways += new Runway(new Exit(250, 650, "E1"), new Exit(650, 500, "E2"))
 	  //runways += new Runway((450, 250), (450, 650))
 	  runways += new Runway(new Exit(250, 250, "E1a"), new Exit(650, 650, "E2a"))
 	  //runways += new Runway((100, 600), (600, 100))
