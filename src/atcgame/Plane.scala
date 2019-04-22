@@ -8,6 +8,7 @@ import java.awt.image.AffineTransformOp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.awt.Color
+import scala.util.Random
 
 class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   
@@ -47,21 +48,22 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
 	  targetX = targetExit.x
 	  targetY = targetExit.y
 	  landingAngle = targetRunway.approachAngle(targetExit)
-	  approachAngle = (Math.atan2((targetY.toDouble - centerY), (targetX - centerX)) + 2*math.Pi - 0.5) % (2 * math.Pi)
-	  println("x: " + targetX + " y: " + targetY)
-	  println("atan2(y/x) " + (math.atan2((targetY.toDouble - centerY), (targetX - centerX)) + 2*math.Pi % (2 * math.Pi)))
-	  println("landing " + landingAngle)
-	  println("approach " + approachAngle)
-    //state = Landing
+	  approachAngle = (Math.atan2((targetY - centerY), (targetX - centerX)) + 2*math.Pi - 0.5) % (2 * math.Pi)
 	  state = PreparingForLanding
   }
   
-  def crashesWith(p: Plane) = {
-    math.abs(p.x - x) < 32 && math.abs(p.y - y) < 32
-  }
   
   
-  sealed trait PlaneState {
+  def crashesWith(p: Plane) = (this sameHeightWith p) && (this overlapsWith p)
+  
+  private def sameHeightWith(p: Plane) = orbit == p.orbit
+  private def overlapsWith(p: Plane) = math.abs(p.x - x) < 32 && math.abs(p.y - y) < 32
+ 
+  
+  
+  
+  
+  sealed abstract trait PlaneState {
     def move(timeDelta: Long): Unit
     def facingAngle: Double
   }
@@ -89,7 +91,7 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
         state = Orbiting
     }
     
-    def facingAngle = radian + 0.1 + Math.PI * 3 / 4
+    def facingAngle = Orbiting.facingAngle + 0.1
   }
   
   case object Approaching extends PlaneState {
@@ -98,15 +100,15 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
       radian %= Math.PI * 2
       orbitRadius -= 0.3
       velocity -= acceleration * timeDelta / 1000
-      x = (centerX + orbitRadius * Math.cos(radian))//.toInt
-      y = (centerY + orbitRadius * Math.sin(radian))//.toInt
+      x = (centerX + orbitRadius * Math.cos(radian))
+      y = (centerY + orbitRadius * Math.sin(radian))
       if(orbitRadius <= 100.0 * orbit) {
         state = Orbiting
         velocity = 100.0
       }
     }
     
-    def facingAngle = radian + 0.3 + Math.PI * 3 / 4
+    def facingAngle = Orbiting.facingAngle + 0.3
   }
   
   
@@ -115,7 +117,7 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
       if(Math.abs(radian - approachAngle) > 0.01) Orbiting.move(timeDelta)
       else {
         orbitRadius = Math.hypot(x - targetX, y - targetY)
-        radian = (Math.atan2((targetY.toDouble - y) , (targetX.toDouble - x)) + math.Pi) % (math.Pi*2)// + math.Pi
+        radian = (Math.atan2((targetY.toDouble - y) , (targetX.toDouble - x)) + math.Pi) % (math.Pi*2)
         println(radian)
         state = ApproachingRunway
       }
@@ -134,20 +136,21 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
         radian %= Math.PI * 2
         orbitRadius -= 1
         velocity -= acceleration * timeDelta / 1000
-        x = (targetX + orbitRadius * Math.cos(radian))//.toInt
-        y = (targetY + orbitRadius * Math.sin(radian))//.toInt
+        x = (targetX + orbitRadius * Math.cos(radian))
+        y = (targetY + orbitRadius * Math.sin(radian))
       }
     }
     
     override def facingAngle = Orbiting.facingAngle + 0.6
   } 
   
+  
   case object Landing extends PlaneState {
     override def move(timeDelta: Long) = {
       if(velocity <= 0) state = Landed
       else {
-        x -= (velocity * timeDelta / 1000 * Math.cos(landingAngle))//.toInt
-        y -= (velocity * timeDelta / 1000 * Math.sin(landingAngle))//.toInt
+        x -= (velocity * timeDelta / 1000 * Math.cos(landingAngle))
+        y -= (velocity * timeDelta / 1000 * Math.sin(landingAngle))
         velocity -= acceleration * timeDelta / 1000
         acceleration += acceleration * 0.3 * timeDelta / 1000
       }
@@ -157,46 +160,14 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   }
   
   
-  case object Landing2 extends PlaneState {
-    var touchdown = false
-    
-    override def move(timeDelta: Long) = {
-  		//println(radian)
-      if(velocity <= 0) state = Landed
-      
-      else if(touchdown == true) {
-        //println((velocity * timeDelta / 1000 * Math.cos(targetAngle)).toInt)
-        x -= (velocity * timeDelta / 1000 * Math.cos(landingAngle))//.toInt
-        y -= (velocity * timeDelta / 1000 * Math.sin(landingAngle))//.toInt
-        velocity -= acceleration * timeDelta / 1000
-        acceleration += acceleration * 0.3 * timeDelta / 1000
-      }
-      
-      else if(Math.abs(radian - landingAngle) > 0.01) 
-        Orbiting.move(timeDelta)
-      
-      else {
-        radian = landingAngle
-        x = (centerX + orbitRadius * Math.cos(radian))//.toInt
-        y = (centerY + orbitRadius * Math.sin(radian))//.toInt
-        touchdown = true
-      }
-    }
-    
-    def facingAngle = {
-      if(!touchdown) radian + Math.PI * 3 / 4 
-      else landingAngle - Math.PI * 3 / 4
-    }
-  }
-  
-  
-  
   case object Landed extends PlaneState {
     override def move(timeDelta: Long) = {
       
     }
+    
     def facingAngle = Math.PI * 3 / 4
   }
+  
   
   case object Takeoff extends PlaneState {
     override def move(timeDelta: Long) = {
@@ -205,7 +176,8 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
     def facingAngle = Math.PI * 3 / 4
   }
   
-  //TODO: maybe move logic into companion object
+  
+  
   def draw(g: Graphics2D) {
     //translate to center of image and rotate around center
 	  val at = new AffineTransform()
@@ -217,12 +189,14 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
 	  val drawX = x.toInt
 	  val drawY = y.toInt
 	  
-    g.drawImage(Plane.planeImage, op, drawX, drawY)
+	  //draw plane
+    g.drawImage(Plane.image(this), op, drawX, drawY)
     
+    //draw some info above plane
     if(selected) g.setColor(Color.YELLOW) //selected plane will be highlighted with yellow
-    else g.setColor(Color.BLACK)
     g.drawString(velocity.toInt.toString() + " kn", drawX - 10, drawY - 45)
     g.drawString(name, drawX - 10, drawY - 30)
+    g.setColor(Color.BLACK)
   }
   
   
@@ -230,7 +204,45 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
 
 //contains information for drawing planes
 object Plane {
-  private val planeImage = ImageIO.read(new File("img/plane2.png"))
-  private val dX = planeImage.getWidth / 2
-  private val dY = planeImage.getHeight / 2
+  private val nOfPlaneTypes = 3
+  
+  def apply() = {
+    Random.nextInt(nOfPlaneTypes) match {
+      case 0 => new PassengerPlane
+      case 1 => new FreightPlane
+      case _ => new JumboJet
+    }
+  }
+  
+  private val passengerImage = ImageIO.read(new File("img/passenger.png"))
+  private val freightImage = ImageIO.read(new File("img/freight.png"))
+  private val jumboJetImage = ImageIO.read(new File("img/jumbo.png"))
+  
+  private val dX = passengerImage.getWidth / 2
+  private val dY = passengerImage.getHeight / 2
+  
+  def image(p: Plane) = {
+    p match {
+      case passenger: PassengerPlane => passengerImage
+      case freight: FreightPlane => freightImage
+      case _ => jumboJetImage
+    }
+  }
+  
+  val carrierNames = Vector("AY", "LH", "SN", "OS", "EY", "CA", "TP")
+  def randomFlightName = {
+    Random.shuffle(carrierNames).head + (Random.nextInt(9000) + 1000)
+  }
+}
+
+class PassengerPlane extends Plane(Plane.randomFlightName, -100, -100) {
+  
+}
+
+class FreightPlane extends Plane(Plane.randomFlightName, -100, -100) {
+  
+}
+
+class JumboJet extends Plane(Plane.randomFlightName, -100, -100) {
+  
 }

@@ -30,22 +30,28 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
   
   val landingOptions = new PopupMenu {
     g.runways.foreach(runway => {
-      //contents += new MenuItem(Action(runway.exit1.name)(plane.land(runway.exit1, runway)))
-      //contents += new MenuItem(Action(runway.exit2.name)(plane.land(runway.exit2, runway)))
       addMenuItem(runway.exit1, runway)
       addMenuItem(runway.exit2, runway)
     })
     
     def addMenuItem(exit: Exit, runway: Runway) = {
       val item = new MenuItem(Action(exit.name)(plane.land(exit, runway))) {
+        listenTo(mouse.clicks)
+        listenTo(mouse.moves)
+        
         reactions += {
-          case event.MouseEntered(_,_,_) => {
-            exit.selected = true
-            plane.selected = true
-          }
-          case event.MouseExited(_,_,_) => {
+          case event.MousePressed(_,_,_,_,_) => {
+            textView.displayMessage("Landing on runway via exit " + exit.name)
             exit.selected = false
             plane.selected = false
+          }
+          case event.MouseEntered(_,_,_) => {
+            plane.selected = true
+            exit.selected = true
+          }
+          case event.MouseExited(_,_,_) => {
+            plane.selected = false
+            exit.selected = false
           }
         }
       }
@@ -56,7 +62,6 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
   val landButton = new Button("Lnd") {
     reactions += {
       case event.ButtonClicked(b: Button) => {
-        //plane.land((250, 250), g.runways(1))
         landingOptions.show(b, 0, 0)
       }
     }
@@ -75,7 +80,7 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
     this.peer.setPreferredSize(new Dimension(300, 30))
     this.peer.setMinimumSize(new Dimension(300, 30))
     this.peer.setMaximumSize(new Dimension(300, 30))
-    var message = "Good day and welcome to Air Traffic Control simulator!!!"
+    var message = "Flight " + plane.name + " approaching airfield"
     var textPos = 300
     override def paintComponent(g: Graphics2D) = {
       g.setColor(Color.BLACK)
@@ -97,6 +102,12 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
   
     val timer = new Timer(10, listener)
     timer.start()
+    
+    def displayMessage(msg: String) = {
+      message = msg
+      textPos = 300
+      timer.start()
+    }
     
     }
   
