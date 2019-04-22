@@ -28,13 +28,22 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
     }
   }
   
+  val landingOptions = new PopupMenu {
+    g.runways.foreach(runway => {
+      contents += new MenuItem(Action(runway.exit1.name)(plane.land(runway.exit1, runway)))
+      contents += new MenuItem(Action(runway.exit2.name)(plane.land(runway.exit2, runway)))
+    })
+  }
+  
   val landButton = new Button("Lnd") {
     reactions += {
       case event.ButtonClicked(b: Button) => {
-        plane.land((250, 250), g.runways(0))
+        //plane.land((250, 250), g.runways(1))
+        landingOptions.show(b, 0, 0)
       }
     }
   }
+  
   
   
   val topRow = new FlowPanel() {

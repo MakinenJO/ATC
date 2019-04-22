@@ -6,19 +6,19 @@ import java.io.File
 import java.awt.geom.AffineTransform
 import java.awt.image.AffineTransformOp
 
-class Runway(val exit1: (Int, Int), val exit2: (Int, Int)) {
+class Runway(val exit1: Exit, val exit2: Exit) {
   
   val rotation = {
-    val x = Math.abs(exit1._1 - exit2._1)
-    val y = exit2._2 - exit1._2//Math.abs(exit1._2 - exit2._2)
+    val x = Math.abs(exit1.x - exit2.x)
+    val y = exit2.y - exit1.y//Math.abs(exit1._2 - exit2._2)
     Math.atan(y.toDouble / x) + Math.PI / 2
   }
   
   val length =  {
-    Math.sqrt(Math.pow((exit1._1 - exit2._1), 2) + Math.pow((exit1._2 - exit2._2), 2))
+    Math.sqrt(Math.pow((exit1.x - exit2.x), 2) + Math.pow((exit1.y - exit2.y), 2))
   }
   
-  def approachAngle(exit: (Int, Int)) = {
+  def approachAngle(exit: Exit) = {
     if (exit == exit1) (rotation + Math.PI / 2) % (Math.PI * 2)
     else (rotation + Math.PI * 3 / 2) % (Math.PI * 2)
   }
@@ -29,8 +29,8 @@ class Runway(val exit1: (Int, Int), val exit2: (Int, Int)) {
     at.translate(-Runway.dX, -Runway.dY)
     at.rotate(rotation, Runway.dX, Runway.dY)
     val op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR)
-    var x = exit1._1
-    var y = exit1._2
+    var x = exit1.x
+    var y = exit1.y
     for(i <- 0 to length.toInt / 32) {
     	g.drawImage(Runway.runwayImage, op, x, y)
     	x += (32 * Math.sin(rotation)).toInt
@@ -38,6 +38,8 @@ class Runway(val exit1: (Int, Int), val exit2: (Int, Int)) {
     }
   }
 }
+
+case class Exit(x: Int, y: Int, name: String)
 
 object Runway {
   private val runwayImage = ImageIO.read(new File("img/runway.png"))

@@ -23,11 +23,11 @@ class Game(val ui: GameUI) extends {
   
   def start() = {
 	  //runways += new Runway((250, 450), (650, 450))
-	  //runways += new Runway((250, 650), (650, 650))
+	  runways += new Runway(new Exit(250, 650, "E1"), new Exit(650, 650, "E2"))
 	  //runways += new Runway((450, 250), (450, 650))
-	  runways += new Runway((250, 250), (650, 650))
+	  runways += new Runway(new Exit(250, 250, "E1a"), new Exit(650, 650, "E2a"))
 	  //runways += new Runway((100, 600), (600, 100))
-	  addPlane(new Plane("Plane", -100, -100, 0.0))
+	  addPlane(new Plane("Plane", -100, -100))
   }
   
   def step() = {
@@ -38,13 +38,13 @@ class Game(val ui: GameUI) extends {
 			planes.foreach(_.move(timeDelta)) 
 			
     }
-    /*
+    
 	  timeTillAdd -= timeDelta.toInt
 		if(timeTillAdd <= 0) {
-		  addPlane(new Plane("Plane" + planes.size, -100, -100, 0.0))
+		  addPlane(new Plane("Plane" + planes.size, -100, -100))
 		  timeTillAdd = addInterval * (scala.util.Random.nextInt(4) + 1)
 		}
-	  */
+	  
 	  checkCollisions()
 	  
 		time = currentTime

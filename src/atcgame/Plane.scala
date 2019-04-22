@@ -9,20 +9,23 @@ import java.awt.image.AffineTransformOp
 import scala.concurrent.ExecutionContext.Implicits.global
 import java.awt.Color
 
-class Plane(val name: String, var x: Double = 0, var y: Double = 0, var radian: Double = 0.0) {
+class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   
+  var radian = 0.0
   var orbit = 4
   val centerX = 450
   val centerY = 450
   var orbitRadius = 100.0 * (orbit+1) //+ 20
   var velocity = 150.0
+  var acceleration = 5.0
   def vAngular = velocity / orbitRadius
   var state: PlaneState = Approaching
   var selected = false //is plane hovered over in flightlistview
   
   var targetX = 0
   var targetY = 0
-  var targetAngle = 0.0
+  var landingAngle = 0.0
+  var approachAngle = 0.0
   
   def move(timeDelta: Long) = {
     state.move(timeDelta)
@@ -40,12 +43,17 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0, var radian: 
     
   }
   
-  def land(targetExit: (Int, Int), targetRunway: Runway) = {
-	  targetX = targetExit._1
-	  targetY = targetExit._2
-	  targetAngle = targetRunway.approachAngle(targetExit)
-	  println(targetAngle)
-    state = Landing
+  def land(targetExit: Exit, targetRunway: Runway) = {
+	  targetX = targetExit.x
+	  targetY = targetExit.y
+	  landingAngle = targetRunway.approachAngle(targetExit)
+	  approachAngle = (Math.atan2((targetY.toDouble - centerY), (targetX - centerX)) + 2*math.Pi - 0.5) % (2 * math.Pi)
+	  println("x: " + targetX + " y: " + targetY)
+	  println("atan2(y/x) " + (math.atan2((targetY.toDouble - centerY), (targetX - centerX)) + 2*math.Pi % (2 * math.Pi)))
+	  println("landing " + landingAngle)
+	  println("approach " + approachAngle)
+    //state = Landing
+	  state = PreparingForLanding
   }
   
   def crashesWith(p: Plane) = {
@@ -62,6 +70,7 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0, var radian: 
     override def move(timeDelta: Long) = {
       //println(radian % (Math.PI*2))
       radian += vAngular * timeDelta / 1000
+      radian %= Math.PI * 2
       x = (centerX + orbitRadius * Math.cos(radian))//.toInt
       y = (centerY + orbitRadius * Math.sin(radian))//.toInt
     }
@@ -71,7 +80,8 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0, var radian: 
   
   case object Descending extends PlaneState {
     override def move(timeDelta: Long) = {
-      radian += vAngular * timeDelta / 1000
+      radian += vAngular * timeDelta / 1000 % (Math.PI * 2)
+      radian %= Math.PI * 2
       orbitRadius -= 0.1
       x = (centerX + orbitRadius * Math.cos(radian))//.toInt
       y = (centerY + orbitRadius * Math.sin(radian))//.toInt
@@ -85,8 +95,9 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0, var radian: 
   case object Approaching extends PlaneState {
     override def move(timeDelta: Long) = {
       radian += vAngular * timeDelta / 1000
+      radian %= Math.PI * 2
       orbitRadius -= 0.3
-      velocity -= 0.1
+      velocity -= acceleration * timeDelta / 1000
       x = (centerX + orbitRadius * Math.cos(radian))//.toInt
       y = (centerY + orbitRadius * Math.sin(radian))//.toInt
       if(orbitRadius <= 100.0 * orbit) {
@@ -99,23 +110,73 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0, var radian: 
   }
   
   
+  case object PreparingForLanding extends PlaneState {
+    override def move(timeDelta: Long) = {
+      if(Math.abs(radian - approachAngle) > 0.01) Orbiting.move(timeDelta)
+      else {
+        orbitRadius = Math.hypot(x - targetX, y - targetY)
+        radian = (Math.atan2((targetY.toDouble - y) , (targetX.toDouble - x)) + math.Pi) % (math.Pi*2)// + math.Pi
+        println(radian)
+        state = ApproachingRunway
+      }
+    }
+    
+    override def facingAngle = Orbiting.facingAngle
+  } 
+  
+  
+  case object ApproachingRunway extends PlaneState {
+    override def move(timeDelta: Long) = {
+      //println(radian)
+      if(math.abs(radian - landingAngle) < 0.01) state = Landing
+      else {
+        radian += vAngular * timeDelta / 1000
+        radian %= Math.PI * 2
+        orbitRadius -= 1
+        velocity -= acceleration * timeDelta / 1000
+        x = (targetX + orbitRadius * Math.cos(radian))//.toInt
+        y = (targetY + orbitRadius * Math.sin(radian))//.toInt
+      }
+    }
+    
+    override def facingAngle = Orbiting.facingAngle + 0.6
+  } 
+  
   case object Landing extends PlaneState {
+    override def move(timeDelta: Long) = {
+      if(velocity <= 0) state = Landed
+      else {
+        x -= (velocity * timeDelta / 1000 * Math.cos(landingAngle))//.toInt
+        y -= (velocity * timeDelta / 1000 * Math.sin(landingAngle))//.toInt
+        velocity -= acceleration * timeDelta / 1000
+        acceleration += acceleration * 0.3 * timeDelta / 1000
+      }
+    }
+    
+    override def facingAngle = landingAngle - Math.PI * 3 / 4
+  }
+  
+  
+  case object Landing2 extends PlaneState {
     var touchdown = false
     
     override def move(timeDelta: Long) = {
-  		//println(radian % (Math.PI*2))
-      if(touchdown == true) {
-        println((velocity * timeDelta / 1000 * Math.cos(targetAngle)).toInt)
-        x -= (velocity * timeDelta / 1000 * Math.cos(targetAngle))//.toInt
-        y -= (velocity * timeDelta / 1000 * Math.sin(targetAngle))//.toInt
-        velocity -= 0.1
+  		//println(radian)
+      if(velocity <= 0) state = Landed
+      
+      else if(touchdown == true) {
+        //println((velocity * timeDelta / 1000 * Math.cos(targetAngle)).toInt)
+        x -= (velocity * timeDelta / 1000 * Math.cos(landingAngle))//.toInt
+        y -= (velocity * timeDelta / 1000 * Math.sin(landingAngle))//.toInt
+        velocity -= acceleration * timeDelta / 1000
+        acceleration += acceleration * 0.3 * timeDelta / 1000
       }
       
-      else if(Math.abs(radian % (Math.PI*2) - targetAngle) > 0.01) 
+      else if(Math.abs(radian - landingAngle) > 0.01) 
         Orbiting.move(timeDelta)
       
       else {
-        radian = targetAngle
+        radian = landingAngle
         x = (centerX + orbitRadius * Math.cos(radian))//.toInt
         y = (centerY + orbitRadius * Math.sin(radian))//.toInt
         touchdown = true
@@ -124,13 +185,13 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0, var radian: 
     
     def facingAngle = {
       if(!touchdown) radian + Math.PI * 3 / 4 
-      else targetAngle - Math.PI * 3 / 4
+      else landingAngle - Math.PI * 3 / 4
     }
   }
   
   
   
-  case object Taxiing extends PlaneState {
+  case object Landed extends PlaneState {
     override def move(timeDelta: Long) = {
       
     }
@@ -150,13 +211,18 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0, var radian: 
 	  val at = new AffineTransform()
 	  at.translate(-Plane.dX, -Plane.dY)
 	  at.rotate(facingAngle, Plane.dX, Plane.dY)
-	  val op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR) 			  
-    g.drawImage(Plane.planeImage, op, x.toInt, y.toInt)
+	  val op = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR) 
+	  
+	  //convert location to int for drawing
+	  val drawX = x.toInt
+	  val drawY = y.toInt
+	  
+    g.drawImage(Plane.planeImage, op, drawX, drawY)
     
     if(selected) g.setColor(Color.YELLOW) //selected plane will be highlighted with yellow
     else g.setColor(Color.BLACK)
-    g.drawString(velocity.toInt.toString() + " kn", x.toInt - 10, y.toInt - 45)
-    g.drawString(name, x.toInt - 10, y.toInt - 30)
+    g.drawString(velocity.toInt.toString() + " kn", drawX - 10, drawY - 45)
+    g.drawString(name, drawX - 10, drawY - 30)
   }
   
   
