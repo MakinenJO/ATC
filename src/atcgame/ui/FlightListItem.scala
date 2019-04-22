@@ -11,7 +11,7 @@ import javax.swing.border.LineBorder
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 
-class FlightListItem(val plane: Plane) extends BoxPanel(Orientation.Horizontal) {
+class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation.Horizontal) {
   this.peer.setPreferredSize(new Dimension(300, 60))
   this.peer.setMinimumSize(new Dimension(300, 60))
   this.peer.setMaximumSize(new Dimension(300, 60))
@@ -31,7 +31,7 @@ class FlightListItem(val plane: Plane) extends BoxPanel(Orientation.Horizontal) 
   val landButton = new Button("Lnd") {
     reactions += {
       case event.ButtonClicked(b: Button) => {
-        plane.land()
+        plane.land((250, 250), g.runways(0))
       }
     }
   }

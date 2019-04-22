@@ -17,6 +17,11 @@ class Runway(val exit1: (Int, Int), val exit2: (Int, Int)) {
   val length =  {
     Math.sqrt(Math.pow((exit1._1 - exit2._1), 2) + Math.pow((exit1._2 - exit2._2), 2))
   }
+  
+  def approachAngle(exit: (Int, Int)) = {
+    if (exit == exit1) (rotation + Math.PI / 2) % (Math.PI * 2)
+    else (rotation + Math.PI * 3 / 2) % (Math.PI * 2)
+  }
 
   
   def draw(g: Graphics2D) {

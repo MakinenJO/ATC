@@ -30,7 +30,7 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
   contents = mainLayout
 
   def addPlane(p: Plane) = {
-    layout.contents += new FlightListItem(p)
+    layout.contents += new FlightListItem(parent.game, p)
     //pack()
     //TODO: use these for animating removal of flightlistitem
     //layout.peer.add(Box.createVerticalStrut(40))
