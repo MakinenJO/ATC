@@ -1,7 +1,7 @@
 package atcgame.ui
 
 import java.awt.Window.Type
-import scala.swing.Button
+import scala.swing._
 
 class GameInfoView
    (parent: GameUI,
@@ -10,6 +10,28 @@ class GameInfoView
     offsetX: Int, offsetY: Int) 
     
 extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.NORMAL) {
-  val button = new Button("restart")
-  contents = button
+  
+  val newGameButton = new Button("New Game") {
+    reactions += {
+      case event.ButtonClicked(_) => {
+        
+      }
+    }
+  }
+  
+  val restartButton = new Button("Restart") {
+    reactions += {
+      case event.ButtonClicked(_) =>{
+        parent.restart()
+      }
+    }
+  }
+  
+  val layout = new BoxPanel(Orientation.Vertical) {
+    contents += newGameButton
+    contents += restartButton
+  }
+  
+  
+  contents = layout
 }

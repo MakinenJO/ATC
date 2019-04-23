@@ -10,13 +10,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.awt.Color
 import scala.util.Random
 
-class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
+class Plane(val game: Game, val name: String, var x: Double = 0, var y: Double = 0) {
   
   var radian = 3.0
   var orbit = 4
   val centerX = 450
   val centerY = 450
-  var orbitRadius = 100.0 * (orbit+1) //+ 20
+  var orbitRadius = 100.0 * (orbit+1)
   var velocity = 150.0
   var acceleration = 5.0
   def vAngular = velocity / orbitRadius
@@ -25,7 +25,7 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   
   var targetX = 0
   var targetY = 0
-  var landingAngle = 0.0
+  var runwayAlignAngle = 0.0
   var approachAngle = 0.0
   
   def move(timeDelta: Long) = {
@@ -37,7 +37,7 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   def descend() = {
     //maybe just call this after text has been displayed ie. no need for future
     scala.concurrent.Future {
-      Thread.sleep(1000)
+      Thread.sleep(2000)
       orbit -= 1
       state = Descending
     }
@@ -47,8 +47,8 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   def land(targetExit: Exit, targetRunway: Runway) = {
 	  targetX = targetExit.x
 	  targetY = targetExit.y
-	  landingAngle = targetRunway.approachAngle(targetExit)
-	  approachAngle = (Math.atan2((targetY - centerY), (targetX - centerX)) + 2*math.Pi - 0.5) % (2 * math.Pi)
+	  runwayAlignAngle = targetRunway.landingAngle(targetExit)
+	  approachAngle = (Math.atan2((targetY - centerY), (targetX - centerX)) + 2*math.Pi - 1) % (2 * math.Pi)
 	  state = PreparingForLanding
   }
   
@@ -59,7 +59,12 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   }
   
   def takeoff(targetExit: Exit, targetRunway: Runway) = {
-    
+    runwayAlignAngle = targetRunway.landingAngle(targetExit) + 2 * math.Pi
+    x = targetExit.x
+    y = targetExit.y
+    velocity = 0
+    acceleration = 1
+    state = PreparingForTakeoff
   }
   
   def crashesWith(p: Plane) = (this sameHeightWith p) && (this overlapsWith p)
@@ -67,9 +72,13 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   private def sameHeightWith(p: Plane) = orbit == p.orbit
   private def overlapsWith(p: Plane) = math.abs(p.x - x) < 32 && math.abs(p.y - y) < 32
  
+  def addNewDeparture() = game.addNewDeparture(this)
   
+  def hasArrived = state == OnGate
   
+  def readyToDepart = state == ReadyToDepart
   
+  def hasDeparted = state == Departed
   
   sealed abstract trait PlaneState {
     def move(timeDelta: Long): Unit
@@ -138,7 +147,7 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   case object ApproachingRunway extends PlaneState {
     override def move(timeDelta: Long) = {
       //println(radian)
-      if(math.abs(radian - landingAngle) < 0.01) state = Landing
+      if(math.abs(radian - runwayAlignAngle) < 0.01) state = Landing
       else {
         radian += vAngular * timeDelta / 1000
         radian %= Math.PI * 2
@@ -157,14 +166,14 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
     override def move(timeDelta: Long) = {
       if(velocity <= 0) state = Landed
       else {
-        x -= (velocity * timeDelta / 1000 * Math.cos(landingAngle))
-        y -= (velocity * timeDelta / 1000 * Math.sin(landingAngle))
+        x -= (velocity * timeDelta / 1000 * Math.cos(runwayAlignAngle))
+        y -= (velocity * timeDelta / 1000 * Math.sin(runwayAlignAngle))
         velocity -= acceleration * timeDelta / 1000
         acceleration += acceleration * 0.3 * timeDelta / 1000
       }
     }
     
-    override def facingAngle = landingAngle - Math.PI * 3 / 4
+    override def facingAngle = runwayAlignAngle - Math.PI * 3 / 4
   }
   
   
@@ -178,19 +187,57 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   
   
   case object OnGate extends PlaneState {
+    var waitTime: Long = 30000 + Random.nextInt(3) * 10000
     override def move(timeDelta: Long) = {
-      
+      waitTime -= timeDelta
+      if(waitTime <= 0) {
+        addNewDeparture()
+        state = ReadyToDepart
+      }
     }
     
     override def facingAngle = 0.0
   }
   
   
-  case object Takeoff extends PlaneState {
+  case object ReadyToDepart extends PlaneState {
     override def move(timeDelta: Long) = {
       
     }
-    def facingAngle = Math.PI * 3 / 4
+    override def facingAngle = - math.Pi * 3 / 4
+  }
+  
+  
+  case object PreparingForTakeoff extends PlaneState {
+    var waitTime: Long = 5000
+    
+    override def move(timeDelta: Long) = {
+      waitTime -= timeDelta
+      if(waitTime <= 0) state = TakingOff
+    }
+    
+    override def facingAngle = runwayAlignAngle - Math.PI * 3 / 4
+  }
+  
+  
+  case object TakingOff extends PlaneState {
+    override def move(timeDelta: Long) = {
+      if(velocity > 1000) state = Departed
+      
+      else {
+        x -= (velocity * timeDelta / 1000 * Math.cos(runwayAlignAngle))
+        y -= (velocity * timeDelta / 1000 * Math.sin(runwayAlignAngle))
+        velocity += acceleration * timeDelta / 1000
+        acceleration += acceleration * 0.3 * timeDelta / 1000
+      }
+    }
+    
+    override def facingAngle = runwayAlignAngle - Math.PI * 3 / 4
+  }
+  
+  case object Departed extends PlaneState {
+    override def move(timeDelta: Long) = {}
+    override def facingAngle = 0
   }
   
   
@@ -224,11 +271,11 @@ object Plane {
   private val nOfPlaneTypes = 3
   
   //generates a plane of random type
-  def apply() = {
+  def apply(g: Game) = {
     Random.nextInt(nOfPlaneTypes) match {
-      case 0 => new PassengerPlane
-      case 1 => new FreightPlane
-      case _ => new JumboJet
+      case 0 => new PassengerPlane(g)
+      case 1 => new FreightPlane(g)
+      case _ => new JumboJet(g)
     }
   }
   
@@ -253,14 +300,14 @@ object Plane {
   }
 }
 
-class PassengerPlane extends Plane(Plane.randomFlightName, -100, -100) {
+class PassengerPlane(g: Game) extends Plane(g, Plane.randomFlightName, -100, -100) {
   
 }
 
-class FreightPlane extends Plane(Plane.randomFlightName, -100, -100) {
+class FreightPlane(g: Game) extends Plane(g, Plane.randomFlightName, -100, -100) {
   
 }
 
-class JumboJet extends Plane(Plane.randomFlightName, -100, -100) {
+class JumboJet(g: Game) extends Plane(g, Plane.randomFlightName, -100, -100) {
   
 }

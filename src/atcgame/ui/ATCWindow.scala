@@ -25,6 +25,7 @@ extends Frame {
   size = new Dimension(width, height)
   preferredSize = size
   
+  def game = parent.game
   //resizable = false
   
   this.peer.setLocation(offsetX, offsetY)

@@ -19,10 +19,10 @@ class GameUI extends SimpleSwingApplication {
   
   UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName)
 
-	var game = new Game(this)
+	var game = new Game()
 	
-  val arrivalsView = new FlightListView(this, "Arrivals", 400, 500, 10, 10)
-  val departuresView = new FlightListView(this, "Departures", 400, 500, 10, 510)
+  val arrivalsView = new FlightListView(this, "Arrivals", 400, 500, 10, 10, Arrivals)
+  val departuresView = new FlightListView(this, "Departures", 400, 500, 10, 510, Departures)
   
   val airfieldView = new AirFieldView(this, "Airport", 1100, 1000, 400, 10)
   
@@ -58,20 +58,19 @@ class GameUI extends SimpleSwingApplication {
   val timer = new Timer(4, listener)
   timer.start()
   
-  //listenTo(arrivalsView.button)
-  listenTo(gameInfoView.button)
-
-  reactions += {
-    case event.ButtonClicked(b: Button) => {
-      b match {
-        //case arrivalsView.button => game.planes.foreach(_.descend())
-        case gameInfoView.button => restart()
-      }
+  
+  val UIlistener = new ActionListener() {
+    def actionPerformed(e: java.awt.event.ActionEvent) = {
+      updateViews()
     }
   }
   
-  def updateViews = {
-    
+  val viewTimer = new Timer(100, UIlistener)
+  viewTimer.start()
+  
+  def updateViews() = {
+    arrivalsView.updateContents()
+    departuresView.updateContents()
   }
   
   def addArrivingPlane(p: Plane) = {
@@ -86,7 +85,7 @@ class GameUI extends SimpleSwingApplication {
   def restart() = {
     timer.stop()
     airfieldView.timer.stop()
-    game = new Game(this)
+    game = new Game()
     timer.start()
     airfieldView.timer.start()
   }

@@ -20,7 +20,7 @@ class Runway(val exit1: Exit, val exit2: Exit) {
     Math.sqrt(Math.pow((exit1.x - exit2.x), 2) + Math.pow((exit1.y - exit2.y), 2))
   }
   
-  def approachAngle(exit: Exit) = {
+  def landingAngle(exit: Exit) = {
     if (exit == exit1) (rotation + Math.PI / 2) % (Math.PI * 2)
     else (rotation + Math.PI * 3 / 2) % (Math.PI * 2)
   }

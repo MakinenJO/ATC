@@ -15,8 +15,6 @@ class AirFieldView
     offsetX: Int, offsetY: Int) 
 
 extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) {
-  def game = parent.game
-  
   
   val fieldView = new Component {
     
@@ -24,6 +22,7 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
       g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
       //g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED)
 
+      g.translate(20, 20) //move everything slightly away from the edges
       
       g.drawOval(250, 250, 400, 400)
   		g.drawOval(0, 0, 900, 900)

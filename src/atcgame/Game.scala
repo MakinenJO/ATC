@@ -9,8 +9,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import atcgame.ui.GameUI
 import java.awt.Color
 
-class Game(val ui: GameUI) extends {
+class Game() extends {
   val planes = Buffer[Plane]()
+  val addedArrivals = Buffer[Plane]()
+  val addedDepartures = Buffer[Plane]()
   val runways = Buffer[Runway]()
   val nOfGates = 5
   val gates = Buffer[Gate]()
@@ -22,7 +24,22 @@ class Game(val ui: GameUI) extends {
   
   def addPlane(p: Plane) = {
     planes += p
-    ui.addArrivingPlane(p)
+    addedArrivals += p
+    //ui.addArrivingPlane(p)
+  }
+  
+  def handleNewArrivals() = {
+    val ret = addedArrivals.toVector
+    addedArrivals.clear()
+    ret
+  }
+  
+  def addNewDeparture(p: Plane) = addedDepartures += p
+  
+  def handleNewDepartures() = {
+    val ret = addedDepartures.toVector
+    addedDepartures.clear()
+    ret
   }
   
   def start() = {
@@ -32,7 +49,7 @@ class Game(val ui: GameUI) extends {
 	  runways += new Runway(new Exit(450, 250, "F1"), new Exit(450, 650, "F2"))
 	  runways += new Runway(new Exit(250, 250, "E1a"), new Exit(650, 650, "E2a"))
 	  //runways += new Runway((100, 600), (600, 100))
-	  addPlane(new PassengerPlane)
+	  addPlane(new PassengerPlane(this))
   }
   
   def step() = {
@@ -46,7 +63,7 @@ class Game(val ui: GameUI) extends {
     
 	  timeTillAdd -= timeDelta.toInt
 		if(timeTillAdd <= 0) {
-		  addPlane(Plane())
+		  addPlane(Plane(this))
 		  timeTillAdd = addInterval * (scala.util.Random.nextInt(4) + 1)
 		}
 	  
@@ -63,6 +80,7 @@ class Game(val ui: GameUI) extends {
     })
     return false
   }
+  
   
   def createGates() {
     for(i <- 1 to nOfGates) {

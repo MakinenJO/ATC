@@ -20,29 +20,19 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
   
   val planeInfo = new Label(plane.name)
   
-  val descendButton = new Button("Dsc") {
-    reactions += {
-      case event.ButtonClicked(b: Button) => {
-        plane.descend()
-      }
-    }
-  }
   
-  val landingOptions = new PopupMenu {
+  val runwayOptions = new PopupMenu {
     contents += new MenuItem("Select runway...")
-    g.runways.foreach(runway => {
-      addMenuItem(runway.exit1, runway)
-      addMenuItem(runway.exit2, runway)
-    })
     
-    def addMenuItem(exit: Exit, runway: Runway) = {
-      val item = new MenuItem(Action(exit.name)(plane.land(exit, runway))) {
+    
+    def addMenuItem(exit: Exit, runway: Runway, msg: String, f: (Exit, Runway) => Unit) = {
+      val item = new MenuItem(Action(exit.name)(f(exit, runway))) {
         listenTo(mouse.clicks)
         listenTo(mouse.moves)
         
         reactions += {
           case event.MousePressed(_,_,_,_,_) => {
-            textView.displayMessage("Landing on runway via exit " + exit.name)
+            textView.displayMessage(msg + " on runway via exit " + exit.name)
             exit.selected = false
             plane.selected = false
           }
@@ -60,10 +50,86 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
     }
   }
   
+  
+  val textView = new Label() {
+    this.peer.setPreferredSize(new Dimension(300, 30))
+    this.peer.setMinimumSize(new Dimension(300, 30))
+    this.peer.setMaximumSize(new Dimension(300, 30))
+    var message = "Flight " + plane.name + " approaching airfield"
+    var textPos = 300
+    override def paintComponent(g: Graphics2D) = {
+      g.setColor(Color.BLACK)
+      g.fillRect(0,0,300, 50)
+      g.setColor(Color.YELLOW)
+      g.drawString(message, textPos, 20)
+      
+      if(textPos < -g.getFontMetrics.stringWidth(message)) {timer.stop()}
+    }
+    
+    //maybe move updating together with gameUI drawing
+    //might be smarter to keep it here, think about stopping
+    val listener = new ActionListener() {
+      def actionPerformed(e: java.awt.event.ActionEvent) = {
+        textPos -= 1
+        repaint()
+      }
+    }
+  
+    val timer = new Timer(10, listener)
+    timer.start()
+    
+    def displayMessage(msg: String) = {
+      message = msg
+      textPos = 300
+      timer.start()
+    }
+    
+    }
+  
+  
+  listenTo(mouse.moves)
+  
+  reactions += {
+    
+    case event.MouseEntered(_,_,_) => {
+      plane.selected = true
+    }
+    
+    case event.MouseExited(_,_,_) => {
+      plane.selected = false
+    }
+  }
+  
+  
+}
+
+
+object FlightListItem {
+  def arrival(g:Game, p: Plane) = new ArrivalItem(g, p)
+  def departure(g:Game, p: Plane) = new DepartureItem(g, p)
+}
+
+
+
+class ArrivalItem(g:Game, plane: Plane) extends FlightListItem(g, plane) {
+  
+  val descendButton = new Button("Dsc") {
+    reactions += {
+      case event.ButtonClicked(b: Button) => {
+        plane.descend()
+      }
+    }
+  }
+  
+  g.runways.foreach(runway => {
+    runwayOptions.addMenuItem(runway.exit1, runway, "Landing", plane.land)
+    runwayOptions.addMenuItem(runway.exit2, runway, "Landing", plane.land)
+  })
+  
   val landButton = new Button("Lnd") {
     reactions += {
       case event.ButtonClicked(b: Button) => {
-        landingOptions.show(b, 0, 0)
+        runwayOptions.show(b, 0, 0)
       }
     }
   }
@@ -108,9 +174,7 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
       }
     }
   }
-  
-  
-  
+   
   val topRow = new FlowPanel() {
     contents += planeInfo
     contents += descendButton
@@ -118,43 +182,38 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
     contents += gateButton
   }
   
+  val mainLayout = new BoxPanel(Orientation.Vertical) {
+    contents += topRow
+    contents += textView
+  }
   
-  val textView = new Label() {
-    this.peer.setPreferredSize(new Dimension(300, 30))
-    this.peer.setMinimumSize(new Dimension(300, 30))
-    this.peer.setMaximumSize(new Dimension(300, 30))
-    var message = "Flight " + plane.name + " approaching airfield"
-    var textPos = 300
-    override def paintComponent(g: Graphics2D) = {
-      g.setColor(Color.BLACK)
-      g.fillRect(0,0,300, 50)
-      g.setColor(Color.YELLOW)
-      g.drawString(message, textPos, 20)
-      
-      if(textPos < -g.getFontMetrics.stringWidth(message)) {timer.stop()}
-    }
-    
-    //maybe move updating together with gameUI drawing
-    //might be smarter to keep it here, think about stopping
-    val listener = new ActionListener() {
-      def actionPerformed(e: java.awt.event.ActionEvent) = {
-        textPos -= 1
-        repaint()
+  contents += mainLayout
+  listenTo(descendButton.mouse.moves)
+  listenTo(landButton.mouse.moves)
+  listenTo(gateButton.mouse.moves)
+}
+
+
+
+
+class DepartureItem(g: Game, plane: Plane) extends FlightListItem(g, plane) {
+  g.runways.foreach(runway => {
+    runwayOptions.addMenuItem(runway.exit1, runway, "Taking off", plane.takeoff)
+    runwayOptions.addMenuItem(runway.exit2, runway, "Taking off", plane.takeoff)
+  })
+  
+  val takeoffButton = new Button("Takeoff") {
+    reactions += {
+      case event.ButtonClicked(b: Button) => {
+        runwayOptions.show(b, 0, 0)
       }
     }
+  }
   
-    val timer = new Timer(10, listener)
-    timer.start()
-    
-    def displayMessage(msg: String) = {
-      message = msg
-      textPos = 300
-      timer.start()
-    }
-    
-    }
-  
-  
+  val topRow = new FlowPanel() {
+    contents += planeInfo
+    contents += takeoffButton
+  }
   
   val mainLayout = new BoxPanel(Orientation.Vertical) {
     contents += topRow
@@ -162,21 +221,6 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
   }
   
   contents += mainLayout
-  //listenTo(button)
-  listenTo(descendButton.mouse.moves)
-  listenTo(landButton.mouse.moves)
-  listenTo(mouse.moves)
   
-  reactions += {
-    
-    case event.MouseEntered(_,_,_) => {
-      plane.selected = true
-    }
-    
-    case event.MouseExited(_,_,_) => {
-      plane.selected = false
-    }
-  }
-  
-  
+  listenTo(takeoffButton.mouse.moves)
 }
