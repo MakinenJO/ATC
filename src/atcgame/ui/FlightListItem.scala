@@ -11,7 +11,7 @@ import javax.swing.border.LineBorder
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 
-class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation.Horizontal) {
+class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation.Vertical) {
   this.peer.setPreferredSize(new Dimension(300, 60))
   this.peer.setMinimumSize(new Dimension(300, 60))
   this.peer.setMaximumSize(new Dimension(300, 60))
@@ -29,6 +29,7 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
   }
   
   val landingOptions = new PopupMenu {
+    contents += new MenuItem("Select runway...")
     g.runways.foreach(runway => {
       addMenuItem(runway.exit1, runway)
       addMenuItem(runway.exit2, runway)
@@ -67,12 +68,54 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
     }
   }
   
+
+  val gateOptions = new PopupMenu {
+    contents += new MenuItem("Select gate...")
+    g.gates.foreach(gate => {
+      addMenuItem(gate)
+    })
+    
+    def addMenuItem(gate: Gate) = {
+      val item = new MenuItem(Action(gate.name)(plane.assignGate(gate))) {
+        listenTo(mouse.clicks)
+        listenTo(mouse.moves)
+        
+        reactions += {
+          case event.MousePressed(_,_,_,_,_) => {
+            textView.displayMessage("Moving to gate " + gate.name)
+            //exit.selected = false
+            plane.selected = false
+          }
+          case event.MouseEntered(_,_,_) => {
+            plane.selected = true
+            //exit.selected = true
+          }
+          case event.MouseExited(_,_,_) => {
+            plane.selected = false
+            //exit.selected = false
+          }
+        }
+      }
+      contents += item
+    }
+  }
+  
+  
+  val gateButton = new Button("Gat") {
+    reactions += {
+      case event.ButtonClicked(b: Button) => {
+        gateOptions.show(b, 0, 0)
+      }
+    }
+  }
+  
   
   
   val topRow = new FlowPanel() {
     contents += planeInfo
     contents += descendButton
     contents += landButton
+    contents += gateButton
   }
   
   

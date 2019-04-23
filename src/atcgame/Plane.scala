@@ -12,7 +12,7 @@ import scala.util.Random
 
 class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   
-  var radian = 0.0
+  var radian = 3.0
   var orbit = 4
   val centerX = 450
   val centerY = 450
@@ -52,7 +52,15 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
 	  state = PreparingForLanding
   }
   
+  def assignGate(gate: Gate) = {
+    x = gate.x + 20
+    y = gate.y + 20
+    state = OnGate
+  }
   
+  def takeoff(targetExit: Exit, targetRunway: Runway) = {
+    
+  }
   
   def crashesWith(p: Plane) = (this sameHeightWith p) && (this overlapsWith p)
   
@@ -169,6 +177,15 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
   }
   
   
+  case object OnGate extends PlaneState {
+    override def move(timeDelta: Long) = {
+      
+    }
+    
+    override def facingAngle = 0.0
+  }
+  
+  
   case object Takeoff extends PlaneState {
     override def move(timeDelta: Long) = {
       
@@ -206,6 +223,7 @@ class Plane(val name: String, var x: Double = 0, var y: Double = 0) {
 object Plane {
   private val nOfPlaneTypes = 3
   
+  //generates a plane of random type
   def apply() = {
     Random.nextInt(nOfPlaneTypes) match {
       case 0 => new PassengerPlane
@@ -223,9 +241,9 @@ object Plane {
   
   def image(p: Plane) = {
     p match {
-      case passenger: PassengerPlane => passengerImage
-      case freight: FreightPlane => freightImage
-      case _ => jumboJetImage
+      case _: PassengerPlane => passengerImage
+      case _: FreightPlane   => freightImage
+      case _                 => jumboJetImage
     }
   }
   

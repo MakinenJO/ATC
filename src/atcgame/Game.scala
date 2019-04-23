@@ -7,10 +7,14 @@ import scala.collection.mutable.Buffer
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import atcgame.ui.GameUI
+import java.awt.Color
 
 class Game(val ui: GameUI) extends {
   val planes = Buffer[Plane]()
   val runways = Buffer[Runway]()
+  val nOfGates = 5
+  val gates = Buffer[Gate]()
+  
   val addInterval = 10000
   var timeTillAdd = addInterval
   
@@ -22,6 +26,7 @@ class Game(val ui: GameUI) extends {
   }
   
   def start() = {
+    createGates()
 	  //runways += new Runway((250, 450), (650, 450))
 	  runways += new Runway(new Exit(250, 650, "E1"), new Exit(650, 500, "E2"))
 	  runways += new Runway(new Exit(450, 250, "F1"), new Exit(450, 650, "F2"))
@@ -59,8 +64,17 @@ class Game(val ui: GameUI) extends {
     return false
   }
   
+  def createGates() {
+    for(i <- 1 to nOfGates) {
+      val x = 1000
+      val y = 50 + i*90
+      gates += new Gate(x, y, "A" + i)
+    }
+  }
+  
   
   def drawAirfield(g: Graphics2D) {
+    gates.foreach(_.draw(g))
     runways.foreach(_.draw(g))
     planes.foreach(_.draw(g))
   }

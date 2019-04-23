@@ -24,9 +24,9 @@ class GameUI extends SimpleSwingApplication {
   val arrivalsView = new FlightListView(this, "Arrivals", 400, 500, 10, 10)
   val departuresView = new FlightListView(this, "Departures", 400, 500, 10, 510)
   
-  val airfieldView = new AirFieldView(this, "Airport", 950, 950, 400, 50)
+  val airfieldView = new AirFieldView(this, "Airport", 1100, 1000, 400, 10)
   
-  val gameInfoView = new GameInfoView(this, "Air Traffic Control", 450, 400, 1350, 200) {
+  val gameInfoView = new GameInfoView(this, "Air Traffic Control", 400, 400, 1500, 200) {
     
     val windows = Vector(arrivalsView, departuresView, airfieldView)
 		
