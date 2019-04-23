@@ -70,6 +70,10 @@ class GameUI extends SimpleSwingApplication {
     }
   }
   
+  def updateViews = {
+    
+  }
+  
   def addArrivingPlane(p: Plane) = {
     arrivalsView.addPlane(p)
   }

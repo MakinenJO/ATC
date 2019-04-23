@@ -73,7 +73,7 @@ class Game(val ui: GameUI) extends {
   }
   
   
-  def drawAirfield(g: Graphics2D) {
+  def drawAirField(g: Graphics2D) {
     gates.foreach(_.draw(g))
     runways.foreach(_.draw(g))
     planes.foreach(_.draw(g))
