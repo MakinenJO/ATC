@@ -11,15 +11,21 @@ import javax.swing.border.LineBorder
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 
-class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation.Vertical) {
-  this.peer.setPreferredSize(new Dimension(300, 60))
-  this.peer.setMinimumSize(new Dimension(300, 60))
-  this.peer.setMaximumSize(new Dimension(300, 60))
+abstract class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation.Vertical) {
+  this.peer.setPreferredSize(new Dimension(350, 70))
+  this.peer.setMinimumSize(new Dimension(350, 70))
+  this.peer.setMaximumSize(new Dimension(350, 70))
   //peer.setBounds(0, 0, 400, 60)
   border = new LineBorder(Color.DARK_GRAY)
   
   val planeInfo = new Label(plane.name)
+  val descriptionLabel = new Label(plane.stateDescription) {
+    this.peer.setPreferredSize(new Dimension(80, 30))
+    this.peer.setMinimumSize(new Dimension(80, 30))
+    this.peer.setMaximumSize(new Dimension(80, 30))
+  }
   
+  def updateContents(): Unit
   
   val runwayOptions = new PopupMenu {
     contents += new MenuItem("Select runway...")
@@ -52,11 +58,11 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
   
   
   val textView = new Label() {
-    this.peer.setPreferredSize(new Dimension(300, 30))
-    this.peer.setMinimumSize(new Dimension(300, 30))
-    this.peer.setMaximumSize(new Dimension(300, 30))
-    var message = "Flight " + plane.name + " approaching airfield"
-    var textPos = 300
+    this.peer.setPreferredSize(new Dimension(250, 30))
+    this.peer.setMinimumSize(new Dimension(250, 30))
+    this.peer.setMaximumSize(new Dimension(250, 30))
+    var message = ""
+    var textPos = 250
     override def paintComponent(g: Graphics2D) = {
       g.setColor(Color.BLACK)
       g.fillRect(0,0,300, 50)
@@ -100,7 +106,11 @@ class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation
     }
   }
   
-  
+  val bottomRow = new FlowPanel() {
+    contents += descriptionLabel
+    contents += textView
+    println(contents.size)
+  }
 }
 
 
@@ -112,6 +122,8 @@ object FlightListItem {
 
 
 class ArrivalItem(g:Game, plane: Plane) extends FlightListItem(g, plane) {
+  
+  textView.message = "Flight " + plane.name + " approaching airfield"
   
   val descendButton = new Button("Dsc") {
     reactions += {
@@ -149,16 +161,16 @@ class ArrivalItem(g:Game, plane: Plane) extends FlightListItem(g, plane) {
         reactions += {
           case event.MousePressed(_,_,_,_,_) => {
             textView.displayMessage("Moving to gate " + gate.name)
-            //exit.selected = false
+            gate.selected = false
             plane.selected = false
           }
           case event.MouseEntered(_,_,_) => {
             plane.selected = true
-            //exit.selected = true
+            gate.selected = true
           }
           case event.MouseExited(_,_,_) => {
             plane.selected = false
-            //exit.selected = false
+            gate.selected = false
           }
         }
       }
@@ -174,7 +186,7 @@ class ArrivalItem(g:Game, plane: Plane) extends FlightListItem(g, plane) {
       }
     }
   }
-   
+
   val topRow = new FlowPanel() {
     contents += planeInfo
     contents += descendButton
@@ -184,19 +196,47 @@ class ArrivalItem(g:Game, plane: Plane) extends FlightListItem(g, plane) {
   
   val mainLayout = new BoxPanel(Orientation.Vertical) {
     contents += topRow
-    contents += textView
+    contents += bottomRow
   }
   
   contents += mainLayout
   listenTo(descendButton.mouse.moves)
   listenTo(landButton.mouse.moves)
   listenTo(gateButton.mouse.moves)
+  
+  override def updateContents() = {
+    descriptionLabel.text = plane.stateDescription
+    if(plane.readyToLand) {
+      landButton.enabled = true
+      descendButton.enabled = false
+      gateButton.enabled = false
+    }
+    else if(plane.hasLanded) {
+      landButton.enabled = false
+      descendButton.enabled = false
+      gateButton.enabled = true
+    }
+    else if(plane.readyToDescend) {
+      landButton.enabled = true
+      descendButton.enabled = true
+      gateButton.enabled = false
+    }
+    else {
+      landButton.enabled = false
+      descendButton.enabled = false
+      gateButton.enabled = false
+    }
+    revalidate()
+    repaint()
+  }
 }
 
 
 
 
 class DepartureItem(g: Game, plane: Plane) extends FlightListItem(g, plane) {
+  textView.message = "Flight " + plane.name + " now boarding"
+  
   g.runways.foreach(runway => {
     runwayOptions.addMenuItem(runway.exit1, runway, "Taking off", plane.takeoff)
     runwayOptions.addMenuItem(runway.exit2, runway, "Taking off", plane.takeoff)
@@ -217,10 +257,16 @@ class DepartureItem(g: Game, plane: Plane) extends FlightListItem(g, plane) {
   
   val mainLayout = new BoxPanel(Orientation.Vertical) {
     contents += topRow
-    contents += textView
+    contents += bottomRow
   }
   
   contents += mainLayout
   
   listenTo(takeoffButton.mouse.moves)
+  
+  override def updateContents() = {
+    descriptionLabel.text = plane.stateDescription
+    if(plane.readyToDepart) takeoffButton.enabled = true
+    else takeoffButton.enabled = false
+  }
 }

@@ -39,8 +39,11 @@ class Game() extends {
   def handleNewDepartures() = {
     val ret = addedDepartures.toVector
     addedDepartures.clear()
+    //planes --= ret
     ret
   }
+  
+  def removePlane(p: Plane) = planes -= p
   
   def start() = {
     createGates()

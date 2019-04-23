@@ -30,7 +30,6 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
   val mainLayout = new ScrollPane()
   mainLayout.horizontalScrollBarPolicy = ScrollPane.BarPolicy.Never
   val layout = new BoxPanel(Orientation.Vertical)
-  
   mainLayout.contents = layout
   
   contents = mainLayout
@@ -57,19 +56,22 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
     layout.contents -= planes(p)
     planes.remove(p)
     peer.revalidate()
-    peer.pack()
+    repaint()
     p.selected = false
   }
   
   def updateContents() {
+    planes.values.foreach(_.updateContents())
     viewType match {
       case Arrivals => {
         game.handleNewArrivals().foreach(plane => addPlane(plane))
-        planes.keys.filter(_.hasArrived).foreach(p => removePlane(p))
+        val toRemove = planes.keys.filter(_.hasArrived)
+        toRemove.foreach(p => removePlane(p))
       }
       case Departures => {
         game.handleNewDepartures().foreach(plane => addPlane(plane))
-        planes.keys.filter(_.hasDeparted).foreach(p => removePlane(p))
+        val toRemove = planes.keys.filter(_.hasDeparted)
+        toRemove.foreach(p => {removePlane(p); game.removePlane(p)})
       }
     }
   }
