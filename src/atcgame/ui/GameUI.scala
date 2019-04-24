@@ -3,15 +3,10 @@ package atcgame.ui
 import atcgame._
 
 import scala.swing._
-import java.awt.Color
-import javax.swing.JInternalFrame
-import javax.swing.JDesktopPane
 import javax.swing.JFrame
 import java.awt.Window.Type
 import javax.swing.WindowConstants
 import javax.swing.UIManager
-import javax.imageio.ImageIO
-import java.io.File
 import java.awt.event.ActionListener
 import javax.swing.Timer
 

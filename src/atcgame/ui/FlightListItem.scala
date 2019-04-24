@@ -8,8 +8,6 @@ import java.awt.event.ActionListener
 import javax.swing.Timer
 import javax.swing.BoxLayout
 import javax.swing.border.LineBorder
-import javafx.scene.layout.HBox
-import javafx.scene.layout.VBox
 
 abstract class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Orientation.Vertical) {
   this.peer.setPreferredSize(new Dimension(350, 70))

@@ -11,18 +11,18 @@ import java.awt.Font
 class Runway(val exit1: Exit, val exit2: Exit) {
   
   val rotation = {
-    val x = Math.abs(exit1.x - exit2.x)
+    val x = math.abs(exit1.x - exit2.x)
     val y = exit2.y - exit1.y
-    Math.atan(y.toDouble / x) + Math.PI / 2
+    math.atan(y.toDouble / x) + math.Pi / 2
   }
   
   val length =  {
-    Math.sqrt(Math.pow((exit1.x - exit2.x), 2) + Math.pow((exit1.y - exit2.y), 2))
+    math.sqrt(math.pow((exit1.x - exit2.x), 2) + math.pow((exit1.y - exit2.y), 2))
   }
   
   def landingAngle(exit: Exit) = {
-    if (exit == exit1) (rotation + Math.PI / 2) % (Math.PI * 2)
-    else (rotation + Math.PI * 3 / 2) % (Math.PI * 2)
+    if (exit == exit1) (rotation + math.Pi / 2) % (math.Pi * 2)
+    else (rotation + math.Pi * 3 / 2) % (math.Pi * 2)
   }
 
   
@@ -35,8 +35,8 @@ class Runway(val exit1: Exit, val exit2: Exit) {
     var y = exit1.y
     for(i <- 0 to length.toInt / 32 + 1) {
     	g.drawImage(Runway.runwayImage, op, x, y)
-    	x += (32 * Math.sin(rotation)).toInt
-    	y -= (32 * Math.cos(rotation)).toInt
+    	x += (32 * math.sin(rotation)).toInt
+    	y -= (32 * math.cos(rotation)).toInt
     }
     
     val normalFont = g.getFont()

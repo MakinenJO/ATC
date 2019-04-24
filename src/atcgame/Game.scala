@@ -6,8 +6,7 @@ import scala.collection.mutable.Buffer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import atcgame.ui.GameUI
-import java.awt.Color
+
 
 class Game extends {
   val planes = Buffer[Plane]()
@@ -79,6 +78,8 @@ class Game extends {
 	  
 		time = currentTime
   }
+  
+  
   
   def checkCollisions(): Boolean = {
     planes.foreach(plane1 => {

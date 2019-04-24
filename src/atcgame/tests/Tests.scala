@@ -15,9 +15,9 @@ class ATCTest extends FlatSpec with Matchers {
     
     val g = new Game()
     
-    val plane1 = new Plane(g, "")
-    val plane2 = new Plane(g, "")
-    val plane3 = new Plane(g, "")
+    val plane1 = Plane(g)
+    val plane2 = Plane(g)
+    val plane3 = Plane(g)
     
     plane1.x = 10; plane1.y = 10
     plane2.x = 100; plane2.y = 100

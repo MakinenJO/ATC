@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.awt.Color
 import scala.util.Random
 
-sealed class Plane(val game: Game, val name: String) {
+sealed abstract class Plane(val game: Game, val name: String) {
   
   var x = -100.0
   var y = -100.0
@@ -25,7 +25,7 @@ sealed class Plane(val game: Game, val name: String) {
   var state: PlaneState = Approaching
   var selected = false //is plane hovered over in flightlistview
   
-  var points = 100
+  val points: Int
   
   var targetX = 0
   var targetY = 0
@@ -55,7 +55,7 @@ sealed class Plane(val game: Game, val name: String) {
   	  targetX = targetExit.x
   	  targetY = targetExit.y
   	  runwayAlignAngle = targetRunway.landingAngle(targetExit)
-  	  approachAngle = (Math.atan2((targetY - centerY), (targetX - centerX)) + 2*math.Pi - 1) % (2 * math.Pi)
+  	  approachAngle = (math.atan2((targetY - centerY), (targetX - centerX)) + 2*math.Pi - 1) % (2 * math.Pi)
   	  state = PreparingForLanding
     }
   }
@@ -114,23 +114,23 @@ sealed class Plane(val game: Game, val name: String) {
   case object Orbiting extends PlaneState {
     override def move(timeDelta: Long) = {
       radian += vAngular * timeDelta / 1000
-      radian %= Math.PI * 2
-      x = (centerX + orbitRadius * Math.cos(radian))
-      y = (centerY + orbitRadius * Math.sin(radian))
+      radian %= math.Pi * 2
+      x = (centerX + orbitRadius * math.cos(radian))
+      y = (centerY + orbitRadius * math.sin(radian))
     }
     
-    override def facingAngle = radian + Math.PI * 3 / 4
+    override def facingAngle = radian + math.Pi * 3 / 4
     override def description = if(altitude==4) "Orbiting" else "Request land"
   }
   
   case object Descending extends PlaneState {
     override def move(timeDelta: Long) = {
-      radian += vAngular * timeDelta / 1000 % (Math.PI * 2)
-      radian %= Math.PI * 2
+      radian += vAngular * timeDelta / 1000 % (math.Pi * 2)
+      radian %= math.Pi * 2
       orbitRadius -= 0.1
       velocity -= deceleration * 0.5 * timeDelta / 1000
-      x = (centerX + orbitRadius * Math.cos(radian))
-      y = (centerY + orbitRadius * Math.sin(radian))
+      x = (centerX + orbitRadius * math.cos(radian))
+      y = (centerY + orbitRadius * math.sin(radian))
       if(orbitRadius <= 450 - (4 - altitude) * 50) {
         state = Orbiting
         velocity = 80.0
@@ -144,11 +144,11 @@ sealed class Plane(val game: Game, val name: String) {
   case object Approaching extends PlaneState {
     override def move(timeDelta: Long) = {
       radian += vAngular * timeDelta / 1000
-      radian %= Math.PI * 2
+      radian %= math.Pi * 2
       orbitRadius -= 0.3
       velocity -= deceleration * 2 * timeDelta / 1000
-      x = (centerX + orbitRadius * Math.cos(radian))
-      y = (centerY + orbitRadius * Math.sin(radian))
+      x = (centerX + orbitRadius * math.cos(radian))
+      y = (centerY + orbitRadius * math.sin(radian))
       if(orbitRadius <= 450 - (4 - altitude) * 50) {
         state = Orbiting
         velocity = 100.0
@@ -162,10 +162,10 @@ sealed class Plane(val game: Game, val name: String) {
   
   case object PreparingForLanding extends PlaneState {
     override def move(timeDelta: Long) = {
-      if(Math.abs(radian - approachAngle) > 0.01) Orbiting.move(timeDelta)
+      if(math.abs(radian - approachAngle) > 0.01) Orbiting.move(timeDelta)
       else {
-        orbitRadius = Math.hypot(x - targetX, y - targetY)
-        radian = (Math.atan2((targetY.toDouble - y) , (targetX.toDouble - x)) + math.Pi) % (math.Pi*2)
+        orbitRadius = math.hypot(x - targetX, y - targetY)
+        radian = (math.atan2((targetY.toDouble - y) , (targetX.toDouble - x)) + math.Pi) % (math.Pi*2)
         altitude = 2
         state = ApproachingRunway
       }
@@ -178,18 +178,18 @@ sealed class Plane(val game: Game, val name: String) {
   
   case object ApproachingRunway extends PlaneState {
     override def move(timeDelta: Long) = {
-      //println(radian)
-      if(math.abs(radian - runwayAlignAngle) < 0.01) {
+      //println("radian: " + radian + " alignangle: " + runwayAlignAngle)
+      if(math.abs(radian - runwayAlignAngle) < 0.03) {
         altitude = 1
         state = Landing
       }
       else {
         radian += vAngular * timeDelta / 1000
-        radian %= Math.PI * 2
+        radian %= math.Pi * 2
         orbitRadius -= 1
         velocity -= deceleration * timeDelta / 1000
-        x = (targetX + orbitRadius * Math.cos(radian))
-        y = (targetY + orbitRadius * Math.sin(radian))
+        x = (targetX + orbitRadius * math.cos(radian))
+        y = (targetY + orbitRadius * math.sin(radian))
       }
     }
     
@@ -202,14 +202,14 @@ sealed class Plane(val game: Game, val name: String) {
     override def move(timeDelta: Long) = {
       if(velocity <= 0) state = Landed
       else {
-        x -= (velocity * timeDelta / 1000 * Math.cos(runwayAlignAngle))
-        y -= (velocity * timeDelta / 1000 * Math.sin(runwayAlignAngle))
+        x -= (velocity * timeDelta / 1000 * math.cos(runwayAlignAngle))
+        y -= (velocity * timeDelta / 1000 * math.sin(runwayAlignAngle))
         velocity -= deceleration * timeDelta / 1000
         deceleration += deceleration * 0.1 * timeDelta / 1000
       }
     }
     
-    override def facingAngle = runwayAlignAngle - Math.PI * 3 / 4
+    override def facingAngle = runwayAlignAngle - math.Pi * 3 / 4
     override def description = "Landing"
   }
   
@@ -219,7 +219,7 @@ sealed class Plane(val game: Game, val name: String) {
       
     }
     
-    override def facingAngle = Math.PI * 3 / 4
+    override def facingAngle = math.Pi * 3 / 4
     override def description = "Landed"
   }
   
@@ -255,7 +255,7 @@ sealed class Plane(val game: Game, val name: String) {
       if(waitTime <= 0) state = TakingOff
     }
     
-    override def facingAngle = runwayAlignAngle - Math.PI * 3 / 4
+    override def facingAngle = runwayAlignAngle - math.Pi * 3 / 4
     override def description = "Taxiing"
   }
   
@@ -268,14 +268,14 @@ sealed class Plane(val game: Game, val name: String) {
       }
       
       else {
-        x -= (velocity * timeDelta / 1000 * Math.cos(runwayAlignAngle))
-        y -= (velocity * timeDelta / 1000 * Math.sin(runwayAlignAngle))
+        x -= (velocity * timeDelta / 1000 * math.cos(runwayAlignAngle))
+        y -= (velocity * timeDelta / 1000 * math.sin(runwayAlignAngle))
         velocity += acceleration * timeDelta / 1000
         acceleration += acceleration * 0.3 * timeDelta / 1000
       }
     }
     
-    override def facingAngle = runwayAlignAngle - Math.PI * 3 / 4
+    override def facingAngle = runwayAlignAngle - math.Pi * 3 / 4
     override def description = if(velocity > 200) "Departed" else "Takeoff"
   }
   
@@ -336,7 +336,6 @@ object Plane {
       case _: PassengerPlane => passengerImage
       case _: FreightPlane   => freightImage
       case _: JumboJet       => jumboJetImage
-      case _                 => passengerImage
     }
   }
   
@@ -348,15 +347,15 @@ object Plane {
 
 class PassengerPlane(g: Game) extends Plane(g, Plane.randomFlightName) {
   deceleration = 6.0
-  points = 100
+  val points = 100
 }
 
 class FreightPlane(g: Game) extends Plane(g, Plane.randomFlightName) {
   deceleration = 5.0
-  points = 150
+  val points = 150
 }
 
 class JumboJet(g: Game) extends Plane(g, Plane.randomFlightName) {
   deceleration = 4.0
-  points = 300
+  val points = 300
 }
