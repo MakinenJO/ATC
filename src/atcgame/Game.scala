@@ -16,6 +16,8 @@ class Game extends {
   val runways = Buffer[Runway]()
   val nOfGates = 5
   val gates = Buffer[Gate]()
+  var crash = false
+  var points = 0
   
   val addInterval = 10000
   var timeTillAdd = addInterval
@@ -38,11 +40,13 @@ class Game extends {
   def handleNewDepartures() = {
     val ret = addedDepartures.toVector
     addedDepartures.clear()
-    //planes --= ret
     ret
   }
   
-  def removePlane(p: Plane) = planes -= p
+  def removePlane(p: Plane) = {
+    points += p.points
+    planes -= p
+  }
   
   def start() = {
     createGates()
@@ -70,7 +74,7 @@ class Game extends {
 		  timeTillAdd = addInterval * (scala.util.Random.nextInt(4) + 1)
 		}
 	  
-	  println(checkCollisions())
+	  if(checkCollisions()) crash = true
 	  
 		time = currentTime
   }
@@ -83,6 +87,8 @@ class Game extends {
     })
     return false
   }
+  
+  def isLost = crash
   
   
   def createGates() {

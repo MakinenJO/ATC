@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.awt.Color
 import scala.util.Random
 
-class Plane(val game: Game, val name: String) {
+sealed class Plane(val game: Game, val name: String) {
   
   var x = -100.0
   var y = -100.0
@@ -24,6 +24,8 @@ class Plane(val game: Game, val name: String) {
   var acceleration = 5.0
   var state: PlaneState = Approaching
   var selected = false //is plane hovered over in flightlistview
+  
+  var points = 100
   
   var targetX = 0
   var targetY = 0
@@ -333,7 +335,8 @@ object Plane {
     p match {
       case _: PassengerPlane => passengerImage
       case _: FreightPlane   => freightImage
-      case _                 => jumboJetImage
+      case _: JumboJet       => jumboJetImage
+      case _                 => passengerImage
     }
   }
   
@@ -344,13 +347,16 @@ object Plane {
 }
 
 class PassengerPlane(g: Game) extends Plane(g, Plane.randomFlightName) {
-  
+  deceleration = 6.0
+  points = 100
 }
 
 class FreightPlane(g: Game) extends Plane(g, Plane.randomFlightName) {
-  
+  deceleration = 5.0
+  points = 150
 }
 
 class JumboJet(g: Game) extends Plane(g, Plane.randomFlightName) {
-  
+  deceleration = 4.0
+  points = 300
 }

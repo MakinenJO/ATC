@@ -15,7 +15,7 @@ abstract class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Or
   this.peer.setPreferredSize(new Dimension(350, 70))
   this.peer.setMinimumSize(new Dimension(350, 70))
   this.peer.setMaximumSize(new Dimension(350, 70))
-  //peer.setBounds(0, 0, 400, 60)
+  
   border = new LineBorder(Color.DARK_GRAY)
   
   val planeInfo = new Label(plane.name)
@@ -109,7 +109,6 @@ abstract class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Or
   val bottomRow = new FlowPanel() {
     contents += descriptionLabel
     contents += textView
-    println(contents.size)
   }
 }
 

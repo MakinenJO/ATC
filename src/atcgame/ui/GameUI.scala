@@ -40,14 +40,15 @@ class GameUI extends SimpleSwingApplication {
       }
       case x: event.WindowActivated => {
         windows.foreach(_.peer.toFront())
-        //println("activated!")
       }
     }
   }
   
-  game.start()
   
   def top = gameInfoView
+  
+  
+  
   
   val gameListener = new ActionListener() {
     def actionPerformed(e: java.awt.event.ActionEvent) = {
@@ -62,6 +63,7 @@ class GameUI extends SimpleSwingApplication {
   val UIlistener = new ActionListener() {
     def actionPerformed(e: java.awt.event.ActionEvent) = {
       updateViews()
+      if(game.isLost) loseGame()
     }
   }
   
@@ -71,10 +73,20 @@ class GameUI extends SimpleSwingApplication {
   def updateViews() = {
     arrivalsView.updateContents()
     departuresView.updateContents()
+    gameInfoView.update()
   }
   
   def newGame() = {
-    
+    game.start()
+  }
+  
+  def loseGame(): Unit = {
+    gameTimer.stop()
+    UITimer.stop()
+    airfieldView.timer.stop()
+    Dialog.showMessage(null,
+        "Oh no, you crashed!\nYour points: " + game.points,
+        "Game Over")
   }
   
   

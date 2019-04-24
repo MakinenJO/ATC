@@ -14,7 +14,7 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.NORMAL) {
   val newGameButton = new Button("New Game") {
     reactions += {
       case event.ButtonClicked(_) => {
-        
+        parent.newGame()
       }
     }
   }
@@ -27,11 +27,22 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.NORMAL) {
     }
   }
   
+  val points = new Label("Points: 0") {
+    def updatePoints(num: Int) = {
+      text = "Points: " + num
+    }
+  }
+  
   val layout = new BoxPanel(Orientation.Vertical) {
     contents += newGameButton
     contents += restartButton
+    contents += points
   }
   
   
   contents = layout
+  
+  def update() = {
+    points.updatePoints(game.points)
+  }
 }
