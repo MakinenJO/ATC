@@ -35,12 +35,12 @@ class GameUI extends SimpleSwingApplication {
         windows.foreach(_.peer.setState(java.awt.Frame.NORMAL))
       }
       case v: event.WindowIconified => {
-        //TODO: pause game
+        //TODO: pause game?
         windows.foreach(_.peer.setState(java.awt.Frame.ICONIFIED))
       }
       case x: event.WindowActivated => {
         windows.foreach(_.peer.toFront())
-        println("activated!")
+        //println("activated!")
       }
     }
   }
@@ -49,14 +49,14 @@ class GameUI extends SimpleSwingApplication {
   
   def top = gameInfoView
   
-  val listener = new ActionListener() {
+  val gameListener = new ActionListener() {
     def actionPerformed(e: java.awt.event.ActionEvent) = {
       game.step()
     }
   }
   
-  val timer = new Timer(4, listener)
-  timer.start()
+  val gameTimer = new Timer(4, gameListener)
+  gameTimer.start()
   
   
   val UIlistener = new ActionListener() {
@@ -65,17 +65,18 @@ class GameUI extends SimpleSwingApplication {
     }
   }
   
-  val viewTimer = new Timer(100, UIlistener)
-  viewTimer.start()
+  val UITimer = new Timer(100, UIlistener)
+  UITimer.start()
   
   def updateViews() = {
     arrivalsView.updateContents()
     departuresView.updateContents()
   }
   
-  def addArrivingPlane(p: Plane) = {
-    arrivalsView.addPlane(p)
+  def newGame() = {
+    
   }
+  
   
   def end() = {
     val result = Dialog.showConfirmation(null, "Do you want to quit?", "Quit", Dialog.Options.YesNo)
@@ -83,10 +84,15 @@ class GameUI extends SimpleSwingApplication {
   }
   
   def restart() = {
-    timer.stop()
+    gameTimer.stop()
+    UITimer.stop()
     airfieldView.timer.stop()
     game = new Game()
-    timer.start()
+    game.start()
+    departuresView.clear()
+    arrivalsView.clear()
+    UITimer.start()
+    gameTimer.start()
     airfieldView.timer.start()
   }
 

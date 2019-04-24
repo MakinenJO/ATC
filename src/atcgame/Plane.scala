@@ -10,8 +10,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import java.awt.Color
 import scala.util.Random
 
-class Plane(val game: Game, val name: String, var x: Double = 0, var y: Double = 0) {
+class Plane(val game: Game, val name: String) {
   
+  var x = -100.0
+  var y = -100.0
   var radian = 3.0
   var altitude = 4
   val centerX = 450
@@ -20,7 +22,6 @@ class Plane(val game: Game, val name: String, var x: Double = 0, var y: Double =
   var velocity = 150.0
   var deceleration = 5.0
   var acceleration = 5.0
-  def vAngular = velocity / orbitRadius
   var state: PlaneState = Approaching
   var selected = false //is plane hovered over in flightlistview
   
@@ -28,6 +29,9 @@ class Plane(val game: Game, val name: String, var x: Double = 0, var y: Double =
   var targetY = 0
   var runwayAlignAngle = 0.0
   var approachAngle = 0.0
+
+  
+  def vAngular = velocity / orbitRadius
   
   def move(timeDelta: Long) = {
     state.move(timeDelta)
@@ -199,7 +203,7 @@ class Plane(val game: Game, val name: String, var x: Double = 0, var y: Double =
         x -= (velocity * timeDelta / 1000 * Math.cos(runwayAlignAngle))
         y -= (velocity * timeDelta / 1000 * Math.sin(runwayAlignAngle))
         velocity -= deceleration * timeDelta / 1000
-        deceleration += deceleration * 0.3 * timeDelta / 1000
+        deceleration += deceleration * 0.1 * timeDelta / 1000
       }
     }
     
@@ -236,7 +240,7 @@ class Plane(val game: Game, val name: String, var x: Double = 0, var y: Double =
     override def move(timeDelta: Long) = {
       
     }
-    override def facingAngle = - math.Pi * 3 / 4
+    override def facingAngle = -math.Pi * 3 / 4
     override def description = "Ready"
   }
   
@@ -339,14 +343,14 @@ object Plane {
   }
 }
 
-class PassengerPlane(g: Game) extends Plane(g, Plane.randomFlightName, -100, -100) {
+class PassengerPlane(g: Game) extends Plane(g, Plane.randomFlightName) {
   
 }
 
-class FreightPlane(g: Game) extends Plane(g, Plane.randomFlightName, -100, -100) {
+class FreightPlane(g: Game) extends Plane(g, Plane.randomFlightName) {
   
 }
 
-class JumboJet(g: Game) extends Plane(g, Plane.randomFlightName, -100, -100) {
+class JumboJet(g: Game) extends Plane(g, Plane.randomFlightName) {
   
 }

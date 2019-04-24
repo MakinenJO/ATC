@@ -14,9 +14,14 @@ import javax.swing.Timer
 import javax.swing.Box
 import javafx.scene.layout.Region
 
+
+
+
 sealed trait ViewType
 case object Arrivals extends ViewType
 case object Departures extends ViewType
+
+
 
 class FlightListView
 (parent: GameUI,
@@ -34,6 +39,13 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
   
   contents = mainLayout
 
+  
+  def clear() = {
+    layout.contents.clear()
+    peer.revalidate()
+    repaint()
+  }
+  
   def addPlane(p: Plane) = {
     
     val newItem = viewType match {
@@ -52,6 +64,7 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
     peer.revalidate()
   }
   
+  
   def removePlane(p: Plane) = {
     layout.contents -= planes(p)
     planes.remove(p)
@@ -60,21 +73,28 @@ extends ATCWindow(parent, title, width, height, offsetX, offsetY, Type.UTILITY) 
     p.selected = false
   }
   
+  
   def updateContents() {
     planes.values.foreach(_.updateContents())
+    
     viewType match {
+      
       case Arrivals => {
         game.handleNewArrivals().foreach(plane => addPlane(plane))
         val toRemove = planes.keys.filter(_.hasArrived)
         toRemove.foreach(p => removePlane(p))
       }
+      
       case Departures => {
         game.handleNewDepartures().foreach(plane => addPlane(plane))
         val toRemove = planes.keys.filter(_.hasDeparted)
         toRemove.foreach(p => {removePlane(p); game.removePlane(p)})
       }
+      
     }
   }
+  
+  
 }
 
 

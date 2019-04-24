@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import atcgame.ui.GameUI
 import java.awt.Color
 
-class Game() extends {
+class Game extends {
   val planes = Buffer[Plane]()
   val addedArrivals = Buffer[Plane]()
   val addedDepartures = Buffer[Plane]()
@@ -25,7 +25,6 @@ class Game() extends {
   def addPlane(p: Plane) = {
     planes += p
     addedArrivals += p
-    //ui.addArrivingPlane(p)
   }
   
   def handleNewArrivals() = {
@@ -49,9 +48,10 @@ class Game() extends {
     createGates()
 	  //runways += new Runway((250, 450), (650, 450))
 	  runways += new Runway(new Exit(250, 650, "E1"), new Exit(650, 500, "E2"))
-	  runways += new Runway(new Exit(450, 250, "F1"), new Exit(450, 650, "F2"))
+	  //runways += new Runway(new Exit(450, 250, "F1"), new Exit(450, 650, "F2"))
 	  runways += new Runway(new Exit(250, 250, "E1a"), new Exit(650, 650, "E2a"))
 	  //runways += new Runway((100, 600), (600, 100))
+    runways += new Runway(new Exit(450, 200, "W1"), new Exit(650, 400, "W2"))
 	  addPlane(new PassengerPlane(this))
   }
   
@@ -70,7 +70,7 @@ class Game() extends {
 		  timeTillAdd = addInterval * (scala.util.Random.nextInt(4) + 1)
 		}
 	  
-	  checkCollisions()
+	  println(checkCollisions())
 	  
 		time = currentTime
   }
@@ -88,7 +88,7 @@ class Game() extends {
   def createGates() {
     for(i <- 1 to nOfGates) {
       val x = 1000
-      val y = 50 + i*90
+      val y = 30 + i*90
       gates += new Gate(x, y, "A" + i)
     }
   }
@@ -100,5 +100,9 @@ class Game() extends {
     planes.foreach(_.draw(g))
   }
   
+  
+}
+
+object Game {
   
 }

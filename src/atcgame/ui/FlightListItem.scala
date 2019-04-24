@@ -128,6 +128,7 @@ class ArrivalItem(g:Game, plane: Plane) extends FlightListItem(g, plane) {
   val descendButton = new Button("Dsc") {
     reactions += {
       case event.ButtonClicked(b: Button) => {
+        textView.displayMessage("Decreasing altitude to 1000ft")
         plane.descend()
       }
     }
