@@ -1,18 +1,13 @@
 package atcgame.ui
 
-import atcgame._
+import java.awt.Window.Type
 
 import scala.collection.mutable.HashMap
+import scala.swing.BoxPanel
+import scala.swing.Orientation
+import scala.swing.ScrollPane
 
-import java.awt.Window.Type
-import java.awt.GridLayout
-import scala.swing._
-import javax.swing.BoxLayout
-import java.awt.Color
-import java.awt.event.ActionListener
-import javax.swing.Timer
-import javax.swing.Box
-import javafx.scene.layout.Region
+import atcgame.Plane
 
 
 

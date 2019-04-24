@@ -1,10 +1,8 @@
 package atcgame
 
-import scala.swing._
-
 import scala.collection.mutable.Buffer
-
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.swing.Graphics2D
 
 
 
