@@ -57,7 +57,6 @@ class GameUI extends SimpleSwingApplication {
   }
   
   val gameTimer = new Timer(4, gameListener)
-  gameTimer.start()
   
   
   val UIlistener = new ActionListener() {
@@ -68,7 +67,6 @@ class GameUI extends SimpleSwingApplication {
   }
   
   val UITimer = new Timer(100, UIlistener)
-  UITimer.start()
   
   def updateViews() = {
     arrivalsView.updateContents()
@@ -78,6 +76,8 @@ class GameUI extends SimpleSwingApplication {
   
   def newGame() = {
     game.start()
+    gameTimer.start()
+    UITimer.start()
   }
   
   def loseGame(): Unit = {

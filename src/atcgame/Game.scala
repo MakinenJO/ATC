@@ -22,7 +22,7 @@ class Game extends {
   val addInterval = 10000
   var timeTillAdd = addInterval
   
-  private var time = System.currentTimeMillis()
+  private var time = 0L
   
   def addPlane(p: Plane) = {
     planes += p
@@ -49,6 +49,7 @@ class Game extends {
   }
   
   def start() = {
+    time = System.currentTimeMillis()
     createGates()
 	  //runways += new Runway((250, 450), (650, 450))
 	  runways += new Runway(new Exit(250, 650, "E1"), new Exit(650, 500, "E2"))
