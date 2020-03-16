@@ -24,6 +24,7 @@ sealed abstract class Plane(val game: Game, val name: String) {
   var acceleration = 5.0
   var state: PlaneState = Approaching
   var selected = false //is plane hovered over in flightlistview
+  var crashAlert = false //is plane too close to another plane
   
   val points: Int
   
@@ -31,6 +32,7 @@ sealed abstract class Plane(val game: Game, val name: String) {
   var targetY = 0
   var runwayAlignAngle = 0.0
   var approachAngle = 0.0
+  var targetName = ""
 
   
   def vAngular = velocity / orbitRadius
@@ -54,6 +56,7 @@ sealed abstract class Plane(val game: Game, val name: String) {
       Thread.sleep(5000)
   	  targetX = targetExit.x
   	  targetY = targetExit.y
+  	  targetName = targetExit.name
   	  runwayAlignAngle = targetRunway.landingAngle(targetExit)
   	  approachAngle = (math.atan2((targetY - centerY), (targetX - centerX)) + 2*math.Pi - 1) % (2 * math.Pi)
   	  state = PreparingForLanding
@@ -87,7 +90,13 @@ sealed abstract class Plane(val game: Game, val name: String) {
   def crashesWith(p: Plane) = (this sameHeightWith p) && (this overlapsWith p)
   
   private def sameHeightWith(p: Plane) = altitude == p.altitude
-  private def overlapsWith(p: Plane) = math.abs(p.x - x) < 32 && math.abs(p.y - y) < 32
+  private def overlapsWith(p: Plane) = {
+    val distX = math.abs(p.x - x)
+    val distY = math.abs(p.y - y)
+    if(distX < 64 && distY < 64) {crashAlert = true; p.crashAlert = true}
+    else {crashAlert = false; p.crashAlert = false}
+    distX < 32 && distY < 32
+  }
  
   def stateDescription = state.description
   
@@ -155,7 +164,7 @@ sealed abstract class Plane(val game: Game, val name: String) {
       }
     }
     
-    def facingAngle = Orbiting.facingAngle + 0.3
+    override def facingAngle = Orbiting.facingAngle + 0.3
     override def description = "Approaching"
   }
   
@@ -172,7 +181,7 @@ sealed abstract class Plane(val game: Game, val name: String) {
     }
     
     override def facingAngle = Orbiting.facingAngle
-    override def description = "Landing"
+    override def description = "Landing ->" + targetName
   } 
   
   
@@ -194,7 +203,7 @@ sealed abstract class Plane(val game: Game, val name: String) {
     }
     
     override def facingAngle = Orbiting.facingAngle + 0.6
-    override def description = "Landing"
+    override def description = "Landing ->" + targetName
   } 
   
   
@@ -210,7 +219,7 @@ sealed abstract class Plane(val game: Game, val name: String) {
     }
     
     override def facingAngle = runwayAlignAngle - math.Pi * 3 / 4
-    override def description = "Landing"
+    override def description = "Landing ->" + targetName
   }
   
   
@@ -236,7 +245,13 @@ sealed abstract class Plane(val game: Game, val name: String) {
     override def facingAngle = 0.0
     override def description = "Boarding"
   }
-  
+ 
+  /* TODO: move logic for time passed when taxiing here
+   * show target gate/runway in description
+  case object TaxiingToGate extends PlaneState {
+    var waitTime: Long = 
+  }
+  */
   
   case object ReadyToDepart extends PlaneState {
     override def move(timeDelta: Long) = {
@@ -300,6 +315,13 @@ sealed abstract class Plane(val game: Game, val name: String) {
 	  
 	  //draw plane
     g.drawImage(Plane.image(this), op, drawX, drawY)
+    
+    //draw circle around plane if it's dangerously close to others
+    if(crashAlert) {
+      g.setColor(Color.ORANGE)
+      g.drawOval(drawX - Plane.dX, drawY - Plane.dY, 40, 40)
+      g.setColor(Color.BLACK)
+    }
     
     //draw some info above plane
     if(selected) g.setColor(Color.YELLOW) //selected plane will be highlighted with yellow

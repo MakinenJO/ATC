@@ -18,9 +18,9 @@ abstract class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Or
   
   val planeInfo = new Label(plane.name)
   val descriptionLabel = new Label(plane.stateDescription) {
-    this.peer.setPreferredSize(new Dimension(80, 30))
-    this.peer.setMinimumSize(new Dimension(80, 30))
-    this.peer.setMaximumSize(new Dimension(80, 30))
+    this.peer.setPreferredSize(new Dimension(100, 30))
+    this.peer.setMinimumSize(new Dimension(100, 30))
+    this.peer.setMaximumSize(new Dimension(100, 30))
   }
   
   def updateContents(): Unit
@@ -54,11 +54,11 @@ abstract class FlightListItem(val g: Game, val plane: Plane) extends BoxPanel(Or
     }
   }
   
-  
+  //A marquee style display which shows communications between ATC and plane
   val textView = new Label() {
-    this.peer.setPreferredSize(new Dimension(250, 30))
-    this.peer.setMinimumSize(new Dimension(250, 30))
-    this.peer.setMaximumSize(new Dimension(250, 30))
+    this.peer.setPreferredSize(new Dimension(230, 30))
+    this.peer.setMinimumSize(new Dimension(230, 30))
+    this.peer.setMaximumSize(new Dimension(230, 30))
     var message = ""
     var textPos = 250
     override def paintComponent(g: Graphics2D) = {
